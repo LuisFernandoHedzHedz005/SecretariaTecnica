@@ -1,0 +1,26 @@
+{
+  "name": "secretariatecnica",
+  "version": "1.0.0",
+  "description": "Proyecto para la materia de vinculación empresarial, creando pagina web de consultas de datos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuisFernandoHedzHedz005/SecretariaTecnica.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LuisFernandoHedzHedz005/SecretariaTecnica/issues"
+  },
+  "homepage": "https://github.com/LuisFernandoHedzHedz005/SecretariaTecnica#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "mysql2": "^3.14.0"
+  }
+}
