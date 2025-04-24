@@ -3,8 +3,8 @@ const path = require('path');
 const session = require('express-session');
 const indexRouter = require('./routes/index');
 const administradorLoginRouter = require('./routes/administradorLogin');
+const visitanteLoginRouter = require ('./routes/visitanteLogin');
 const sugerenciasRouter = require('./routes/sugerencias');
-const visitanteRouter = require('./routes/visitante');
 const contactoRouter = require('./routes/contacto');
 
 const app = express();
@@ -22,7 +22,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: process.env.NODE_ENV === 'production', // true si usas HTTPS, creo que en render si mete https, luego checo
+        secure: process.env.NODE_ENV === 'production', // true HTTPS, creo que en render si mete https, luego checo
         maxAge: 24 * 60 * 60 * 1000 // 24 horas
     }
 }));
@@ -39,17 +39,26 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    res.locals.visitante = req.session.visitante || null;
+    next();
+});
+
 // Rutas
 app.use('/', indexRouter);
 app.use('/administradorLogin', administradorLoginRouter);
 app.use('/sugerencias', sugerenciasRouter);
-app.use('/visitante', visitanteRouter);
+app.use('/visitanteLogin', visitanteLoginRouter);
 app.use('/contacto', contactoRouter);
 
 // Agregar rutas protegidas para el administrador
 const administradorRoutes = require('./routes/administradorhome');
 const { verificarAutenticacion } = require('./controllers/administradorLoginController');
 app.use('/administradorhome', verificarAutenticacion, administradorRoutes);
+// Agregar rutas protegidas para el visitante
+const visitanteRoutes = require('./routes/visitantehome');
+const { verificarAutenticacionV } = require('./controllers/visitanteLoginController');
+app.use('/visitantehome', verificarAutenticacionV, visitanteRoutes);
 
 // Iniciar el servidor
 app.listen(PORT, () => {

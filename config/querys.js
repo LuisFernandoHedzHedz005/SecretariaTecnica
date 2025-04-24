@@ -26,7 +26,33 @@ async function verificarContrasenaAdmin(usuario, contrasena) {
     }
 }
 
+async function verificarVisitante(usuario, contrasena) {
+    try {
+        const rows = await query('SELECT * FROM usuario_app WHERE usuario = ? AND contrasena = ? AND rol_id = 2 AND activo = TRUE', [usuario, contrasena]);
+        console.log('Resultado de verificación:', rows);
+        if(rows && rows.length > 0) {
+            return rows[0];
+        }
+        return null;
+    } catch (error) {
+        console.error('Error al verificar visitante:', error);
+        return null;
+    }
+}
+async function verificarContrasenaVisitante(usuario, contrasena) {
+    try {
+        const visitante = await verificarVisitante(usuario, contrasena);
+        console.log('Visitante encontrado:', visitante);
+        return visitante !== null;
+    } catch (error) {
+        console.error('Error al verificar contraseña:', error);
+        return false;
+    }
+}
+
 module.exports = {
     verificarAdministrador,
-    verificarContrasenaAdmin
+    verificarContrasenaAdmin,
+    verificarVisitante,
+    verificarContrasenaVisitante
 };
