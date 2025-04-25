@@ -4,7 +4,7 @@ const session = require('express-session');
 // Función para mostrar el formulario de login
 const mostrarFormularioLogin = (req, res) => {
     // Verificar si ya hay una sesión activa
-    if (req.session && req.session.administrador) {
+    if (req.session && req.session.visitante) {
         return res.redirect('/visitantehome'); 
     }
     // Pasar mensaje de error si existe
@@ -25,15 +25,15 @@ const procesarLogin = async (req, res) => {
         }
         
         // Verificar las credenciales
-        const admin = await verificarVisitante(username, password);
+        const visitante= await verificarVisitante(username, password);
         
-        if (admin) {
+        if (visitante) {
             // Aqui guardamos los datos
-            req.session.administrador = {
-                id: admin.usuario_id,
-                usuario: admin.usuario,
-                correo: admin.correo,
-                rol: admin.rol_id
+            req.session.visitante = {
+                id: visitante.usuario_id,
+                usuario: visitante.usuario,
+                correo: visitante.correo,
+                rol: visitante.rol_id
             };
 
             return res.redirect('/visitantehome');
@@ -61,7 +61,7 @@ const cerrarSesion = (req, res) => {
 
 // Middleware para verificar si el usuario está autenticado
 const verificarAutenticacionV = (req, res, next) => {
-    if (req.session && req.session.administrador) {
+    if (req.session && req.session.visitante) {
         return next();
     } else {
         req.session.errorMsg = 'Debes iniciar sesión para acceder';

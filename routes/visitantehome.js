@@ -1,4 +1,4 @@
-const express = require('express');
+/*const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -6,5 +6,18 @@ router.get('/', (req, res) => {
         visitante: req.session.visitante
     });
 });
+
+module.exports = router;
+*/
+
+const express = require('express');
+const router = express.Router();
+const visitantehomeController = require('../controllers/visitantehomeController');
+
+// Ruta para el dashboard principal
+router.get('/', visitantehomeController.mostrarDashboard);
+
+// Ruta para buscar profesores
+router.get('/buscar', visitantehomeController.buscarProfesores);
 
 module.exports = router;
