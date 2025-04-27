@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Sistema de gestión de profesores" />
+        <meta name="author" content="Ingeniería Mecánica" />
+        <title>Dashboard Administrador - Profesores</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="/image/favicon.ico" />
+        <!-- Google Font-->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- DataTables CSS -->
+        <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->       
+        <link href="/css/styles.css" rel="stylesheet" />
+        <style>
+            .text-gradient {
+                background: linear-gradient(45deg, #0061f2, #6900c7);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+            .profesor-row:hover {
+                background-color: #f8f9fa;
+                cursor: pointer;
+            }
+            .categoria-badge {
+                font-size: 0.85em;
+                margin-right: 5px;
+                margin-bottom: 5px;
+                display: inline-block;
+            }
+        </style>
+    </head>
+    <body class="d-flex flex-column h-100">
+        <main class="flex-shrink-0">
+            <!-- Navar-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+                <div class="container px-5">
+                    <a class="navbar-brand" href="/"><span class="fw-bolder text-primary">Ingeniería Mecánica - Secretaría Técnica</span></a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 small fw-bolder">
+                            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/administradorhome">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/administradorLogin/logout">Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <section class="py-5">
+                <div class="container px-5">
+                    <div class="text-center mb-5">
+                        <h1 class="display-5 fw-bolder mb-0"><span class="text-gradient d-inline">Añadir Nuevo Profesor</span></h1>
+                    </div>
+                    
+                    <div class="row gx-5 justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="card shadow rounded-4 border-0 mb-5">
+                                <div class="card-body p-5">
+                                    <!-- Mensajes de alerta -->
+                                    <% if (errorMsg) { %>
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <%= errorMsg %>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <% if (successMsg) { %>
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                            <%= successMsg %>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <!-- Formulario para añadir profesor -->
+                                    <form action="/administradorhome/anadirProfesor" method="POST" id="profesorForm">
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5>Información Personal</h5>
+                                                <hr>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="numero_trabajador" name="numero_trabajador" placeholder="Número de trabajador" required>
+                                                    <label for="numero_trabajador">Número de trabajador *</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre" required>
+                                                    <label for="nombre">Nombre(s) *</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno" placeholder="Apellido paterno" required>
+                                                    <label for="apellido_paterno">Apellido paterno *</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="apellido_materno" name="apellido_materno" placeholder="Apellido materno" required>
+                                                    <label for="apellido_materno">Apellido materno *</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <select class="form-select" id="genero_id" name="genero_id" required>
+                                                        <option value="" selected disabled>Seleccione una opción</option>
+                                                        <% generos.forEach(genero => { %>
+                                                            <option value="<%= genero.genero_id %>"><%= genero.descripcion %></option>
+                                                        <% }); %>
+                                                    </select>
+                                                    <label for="genero_id">Género *</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="rfc" name="rfc" placeholder="RFC" required maxlength="13" minlength="13">
+                                                    <label for="rfc">RFC *</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="curp" name="curp" placeholder="CURP" required maxlength="18" minlength="18">
+                                                    <label for="curp">CURP *</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5>Información Académica</h5>
+                                                <hr>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <select class="form-select" id="grado_id" name="grado_id" required>
+                                                        <option value="" selected disabled>Seleccione una opción</option>
+                                                        <% grados.forEach(grado => { %>
+                                                            <option value="<%= grado.grado_id %>"><%= grado.descripcion %></option>
+                                                        <% }); %>
+                                                    </select>
+                                                    <label for="grado_id">Grado académico *</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control" id="antiguedad_unam" name="antiguedad_unam" placeholder="Antigüedad UNAM" required min="0">
+                                                    <label for="antiguedad_unam">Antigüedad UNAM (años) *</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control" id="antiguedad_carrera" name="antiguedad_carrera" placeholder="Antigüedad carrera" required min="0">
+                                                    <label for="antiguedad_carrera">Antigüedad carrera (años) *</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5>Información de Contacto</h5>
+                                                <hr>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="email" class="form-control" id="correo_institucional" name="correo_institucional" placeholder="Correo electrónico" required>
+                                                    <label for="correo_institucional">Correo institucional *</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="tel" class="form-control" id="telefono_casa" name="telefono_casa" placeholder="Teléfono de casa">
+                                                    <label for="telefono_casa">Teléfono casa</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <input type="tel" class="form-control" id="telefono_celular" name="telefono_celular" placeholder="Teléfono celular">
+                                                    <label for="telefono_celular">Teléfono celular</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-8">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Dirección">
+                                                    <label for="direccion">Dirección</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-floating mb-3">
+                                                    <select class="form-select" id="estado_id" name="estado_id" required>
+                                                        <option value="" selected disabled>Seleccione una opción</option>
+                                                        <% estados.forEach(estado => { %>
+                                                            <option value="<%= estado.estado_id %>"><%= estado.descripcion %></option>
+                                                        <% }); %>
+                                                    </select>
+                                                    <label for="estado_id">Estado *</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-4">
+                                            <div class="col-12 d-flex justify-content-between align-items-center">
+                                                <h5>Categorías</h5>
+                                                <button type="button" class="btn btn-outline-primary btn-sm" id="agregarCategoria">
+                                                    <i class="bi bi-plus-circle"></i> Agregar categoría
+                                                </button>
+                                            </div>
+                                            <div class="col-12">
+                                                <hr>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="categoriasContainer">
+                                            <!-- Aquí se añadirán las categorías dinámicamente -->
+                                            <div class="categoria-item row mb-3">
+                                                <div class="col-md-3">
+                                                    <div class="form-floating mb-3">
+                                                        <select class="form-select puesto-select" name="puestos" required>
+                                                            <option value="" selected disabled>Seleccione un puesto</option>
+                                                            <% puestos.forEach(puesto => { %>
+                                                                <option value="<%= puesto.puesto_id %>"><%= puesto.descripcion %></option>
+                                                            <% }); %>
+                                                        </select>
+                                                        <label>Puesto *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-floating mb-3">
+                                                        <select class="form-select asignatura-select" name="asignaturas" required>
+                                                            <option value="" selected disabled>Seleccione una asignatura</option>
+                                                            <% asignaturas.forEach(asignatura => { %>
+                                                                <option value="<%= asignatura.asignatura_id %>"><%= asignatura.nombre %></option>
+                                                            <% }); %>
+                                                        </select>
+                                                        <label>Asignatura *</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="date" class="form-control fecha-inicio" name="fechas_inicio">
+                                                        <label>Fecha inicio</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="date" class="form-control fecha-fin" name="fechas_fin">
+                                                        <label>Fecha fin</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 d-flex align-items-center">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm eliminar-categoria" disabled>
+                                                        <i class="bi bi-trash"></i> Eliminar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between mt-4">
+                                            <a href="/administradorhome" class="btn btn-secondary">
+                                                <i class="bi bi-arrow-left"></i> Volver
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-save"></i> Guardar profesor
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    <footer class="bg-white py-4 mt-auto">
+        <div class="container px-5">
+            <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                <div class="col-auto"><div class="small m-0">Copyright &copy; Ingeniería Mecánica 2025</div></div>
+                <div class="col-auto">
+                    <a class="small" href="#!">Privacidad</a>
+                    <span class="mx-1">&middot;</span>
+                    <a class="small" href="#!">Términos</a>
+                    <span class="mx-1">&middot;</span>
+                    <a class="small" href="/contacto">Contacto</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#profesores-table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+                },
+                pageLength: 10,
+                responsive: true,
+                dom: 'Bfrtip',
+                buttons: []
+            });
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Agregar nueva categoría
+            document.getElementById('agregarCategoria').addEventListener('click', function() {
+                const categoriaTemplate = document.querySelector('.categoria-item').cloneNode(true);
+                const container = document.getElementById('categoriasContainer');
+                
+                // Habilitar el botón de eliminar en la nueva categoría
+                categoriaTemplate.querySelector('.eliminar-categoria').disabled = false;
+                
+                // Actualizar los nombres de los campos para que sean arrays
+                const puestoSelect = categoriaTemplate.querySelector('.puesto-select');
+                const asignaturaSelect = categoriaTemplate.querySelector('.asignatura-select');
+                const fechaInicio = categoriaTemplate.querySelector('.fecha-inicio');
+                const fechaFin = categoriaTemplate.querySelector('.fecha-fin');
+                
+                puestoSelect.name = 'puestos[]';
+                asignaturaSelect.name = 'asignaturas[]';
+                fechaInicio.name = 'fechas_inicio[]';
+                fechaFin.name = 'fechas_fin[]';
+                
+                // Limpiar selecciones
+                puestoSelect.selectedIndex = 0;
+                asignaturaSelect.selectedIndex = 0;
+                fechaInicio.value = '';
+                fechaFin.value = '';
+                
+                container.appendChild(categoriaTemplate);
+                
+                // Configurar evento de eliminación para la nueva categoría
+                categoriaTemplate.querySelector('.eliminar-categoria').addEventListener('click', function() {
+                    container.removeChild(categoriaTemplate);
+                });
+            });
+            
+            // Configurar el evento de eliminación para la primera categoría (cuando se agregue más de una)
+            document.querySelectorAll('.eliminar-categoria').forEach(button => {
+                button.addEventListener('click', function() {
+                    const categoriaItem = this.closest('.categoria-item');
+                    if (document.querySelectorAll('.categoria-item').length > 1) {
+                        document.getElementById('categoriasContainer').removeChild(categoriaItem);
+                    }
+                });
+            });
+            
+            // Validación de formulario
+            document.getElementById('profesorForm').addEventListener('submit', function(event) {
+                const form = this;
+                
+                // Validar RFC (13 caracteres)
+                const rfc = form.querySelector('#rfc').value;
+                if (rfc.length !== 13) {
+                    alert('El RFC debe tener exactamente 13 caracteres.');
+                    event.preventDefault();
+                    return;
+                }
+                
+                // Validar CURP (18 caracteres)
+                const curp = form.querySelector('#curp').value;
+                if (curp.length !== 18) {
+                    alert('El CURP debe tener exactamente 18 caracteres.');
+                    event.preventDefault();
+                    return;
+                }
+                
+                // Validar correo institucional
+                const correo = form.querySelector('#correo_institucional').value;
+                if (!correo.includes('@')) {
+                    alert('Por favor, ingrese un correo electrónico válido.');
+                    event.preventDefault();
+                    return;
+                }
+                
+                // Validar que los campos numéricos sean positivos
+                const antiguedadUnam = parseInt(form.querySelector('#antiguedad_unam').value);
+                const antiguedadCarrera = parseInt(form.querySelector('#antiguedad_carrera').value);
+                
+                if (antiguedadUnam < 0 || antiguedadCarrera < 0) {
+                    alert('Los valores de antigüedad deben ser positivos.');
+                    event.preventDefault();
+                    return;
+                }
+                
+                // Verificar que cada categoría tenga puesto y asignatura seleccionados
+                const categorias = form.querySelectorAll('.categoria-item');
+                let categoriasValidas = true;
+                
+                categorias.forEach(categoria => {
+                    const puesto = categoria.querySelector('.puesto-select').value;
+                    const asignatura = categoria.querySelector('.asignatura-select').value;
+                    
+                    if (!puesto || !asignatura) {
+                        alert('Por favor, complete los campos de puesto y asignatura en todas las categorías.');
+                        categoriasValidas = false;
+                        event.preventDefault();
+                        return;
+                    }
+                    
+                    // Validar que fecha fin sea posterior a fecha inicio si ambas están presentes
+                    const fechaInicio = categoria.querySelector('.fecha-inicio').value;
+                    const fechaFin = categoria.querySelector('.fecha-fin').value;
+                    
+                    if (fechaInicio && fechaFin && new Date(fechaFin) <= new Date(fechaInicio)) {
+                        alert('La fecha de fin debe ser posterior a la fecha de inicio.');
+                        categoriasValidas = false;
+                        event.preventDefault();
+                        return;
+                    }
+                });
+                
+                if (!categoriasValidas) {
+                    return;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

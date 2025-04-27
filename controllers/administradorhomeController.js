@@ -277,9 +277,58 @@ const buscarProfesores = async (req, res) => {
   }
 };
 
+// Función para eliminar un profesor por ID
+const eliminarProfesor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'ID de profesor no proporcionado' });
+    }
+    
+    // Primero obtenemos los datos del profesor para log
+    const sqlGetProfesor = `
+      SELECT 
+        p.nombre, p.apellido_paterno, p.apellido_materno, p.numero_trabajador
+      FROM 
+        profesor p
+      WHERE 
+        p.profesor_id = $1
+    `;
+    
+    const profesorData = await query(sqlGetProfesor, [id]);
+    
+    if (profesorData.length === 0) {
+      return res.status(404).json({ success: false, message: 'Profesor no encontrado' });
+    }
+    
+    // La tabla tiene relaciones con DELETE CASCADE, así que solo necesitamos eliminar el profesor
+    const sqlDeleteProfesor = `DELETE FROM profesor WHERE profesor_id = $1`;
+    await query(sqlDeleteProfesor, [id]);
+    
+    // Registrar la eliminación
+    const profesor = profesorData[0];
+    console.log(`Profesor eliminado: ${profesor.nombre} ${profesor.apellido_paterno} ${profesor.apellido_materno} (${profesor.numero_trabajador})`);
+    
+    // Responder con éxito
+    return res.json({ 
+      success: true, 
+      message: `Profesor ${profesor.nombre} ${profesor.apellido_paterno} ${profesor.apellido_materno} eliminado correctamente` 
+    });
+  } catch (error) {
+    console.error('Error al eliminar profesor:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error al eliminar profesor', 
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno del servidor'
+    });
+  }
+};
+
 // Exportar funciones del controlador
 module.exports = {
   mostrarDashboard,
   descargarExcel,
-  buscarProfesores
+  buscarProfesores,
+  eliminarProfesor
 };

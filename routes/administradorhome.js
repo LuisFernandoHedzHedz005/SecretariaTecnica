@@ -24,4 +24,7 @@ router.get('/descargar-excel', administradorhomeController.descargarExcel);
 // Ruta para buscar profesores
 router.get('/buscar', administradorhomeController.buscarProfesores);
 
+// Ruta para eliminar un profesor
+router.delete('/eliminar/:id', administradorhomeController.eliminarProfesor);
+
 module.exports = router;

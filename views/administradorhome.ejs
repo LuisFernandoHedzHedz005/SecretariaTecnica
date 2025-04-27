@@ -16,7 +16,9 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
         <!-- DataTables CSS -->
         <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
-        <!-- Core theme CSS (includes Bootstrap)-->
+        <!-- SweetAlert2 -->
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->       
         <link href="/css/styles.css" rel="stylesheet" />
         <style>
             .text-gradient {
@@ -37,6 +39,20 @@
                 margin-right: 5px;
                 margin-bottom: 5px;
                 display: inline-block;
+            }
+            .btn-eliminar {
+                color: #fff;
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }
+            .btn-eliminar:hover {
+                color: #fff;
+                background-color: #c82333;
+                border-color: #bd2130;
+            }
+            .acciones-column {
+                width: 100px;
+                text-align: center;
             }
         </style>
     </head>
@@ -97,6 +113,9 @@
                                             <a href="/administradorhome/descargar-excel<%= typeof busqueda !== 'undefined' && busqueda ? '?termino=' + encodeURIComponent(busqueda) : '' %>" class="btn btn-success" id="exportExcelBtn">
                                                 <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
                                             </a>
+                                            <a href="/administradorhome/anadirProfesor" class="btn btn-primary ms-2" id="addProfesorBtn">
+                                                <i class="bi bi-plus-circle"></i> Añadir Profesor
+                                            </a>
                                         </div>
                                     </div>
                                     
@@ -114,6 +133,7 @@
                                                     <th>Antigüedad</th>
                                                     <th>Estado</th>
                                                     <th>Categorías</th>
+                                                    <th class="acciones-column">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -152,11 +172,17 @@
                                                                     <em>Sin categorías asignadas</em>
                                                                 <% } %>
                                                             </td>
+                                                            <td class="acciones-column">
+                                                                <button type="button" class="btn btn-sm btn-eliminar" 
+                                                                    onclick="confirmarEliminarProfesor('<%= profesor.profesor_id %>', '<%= profesor.nombre %> <%= profesor.apellido_paterno %> <%= profesor.apellido_materno %>')">
+                                                                    <i class="bi bi-trash"></i> Eliminar
+                                                                </button>
+                                                            </td>
                                                         </tr>
                                                     <% }); %>
                                                 <% } else { %>
                                                     <tr>
-                                                        <td colspan="9" class="text-center">No se encontraron profesores</td>
+                                                        <td colspan="10" class="text-center">No se encontraron profesores</td>
                                                     </tr>
                                                 <% } %>
                                             </tbody>
@@ -189,6 +215,8 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <!-- DataTables JS -->
         <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
@@ -201,11 +229,13 @@
                     pageLength: 10,
                     responsive: true,
                     dom: 'Bfrtip',
-                    buttons: []
+                    buttons: [],
+                    columnDefs: [
+                        { targets: -1, orderable: false } // La última columna (acciones) no es ordenable
+                    ]
                 });
             });
         </script>
-
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Actualizar el link de exportación cuando se cambia el término de búsqueda
@@ -223,6 +253,82 @@
                     });
                 }
             });
-            </script>
+            
+            // Función para confirmar eliminación de profesor
+            function confirmarEliminarProfesor(profesorId, nombreProfesor) {
+                // Evitar que el evento se propague a la fila (para evitar confusiones con el evento de clic en la fila)
+                event.stopPropagation();
+                
+                Swal.fire({
+                    title: '¿Está seguro?',
+                    html: `¿Realmente desea eliminar al profesor <strong>${nombreProfesor}</strong>?<br>Esta acción no se puede deshacer.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        eliminarProfesor(profesorId);
+                    }
+                });
+            }
+            
+            // Función para enviar la solicitud de eliminación
+            function eliminarProfesor(profesorId) {
+                fetch(`/administradorhome/eliminar/${profesorId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        }).then(() => {
+                            // Recargar la página para reflejar los cambios
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'No se pudo eliminar al profesor',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al eliminar profesor:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al procesar la solicitud',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
+            }
+            
+            // Manejar clics en filas de la tabla para la navegación 
+            // (previene conflicto con el botón eliminar)
+            $(document).ready(function() {
+                // Agregar manejador de eventos para la fila, excluyendo el botón de eliminar
+                $('.profesor-row').on('click', function(e) {
+                    // Si el clic fue en el botón eliminar o dentro del botón, no hacer nada
+                    if ($(e.target).closest('.btn-eliminar').length) {
+                        return;
+                    }
+                    
+                    // Aquí puedes agregar código para navegar a la página de detalles del profesor
+                    // const profesorId = $(this).data('profesor-id');
+                    // window.location.href = `/administradorhome/detalles/${profesorId}`;
+                });
+            });
+        </script>
     </body>
 </html>

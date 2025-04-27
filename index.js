@@ -6,6 +6,9 @@ const administradorLoginRouter = require('./routes/administradorLogin');
 const visitanteLoginRouter = require ('./routes/visitanteLogin');
 const sugerenciasRouter = require('./routes/sugerencias');
 const contactoRouter = require('./routes/contacto');
+const administradorRoutes = require('./routes/administradorhome');
+const visitanteRoutes = require('./routes/visitantehome');
+anadirProfesorRouter = require('./routes/anadirProfesor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,13 +55,13 @@ app.use('/visitanteLogin', visitanteLoginRouter);
 app.use('/contacto', contactoRouter);
 
 // Agregar rutas protegidas para el administrador
-const administradorRoutes = require('./routes/administradorhome');
 const { verificarAutenticacion } = require('./controllers/administradorLoginController');
 app.use('/administradorhome', verificarAutenticacion, administradorRoutes);
 // Agregar rutas protegidas para el visitante
-const visitanteRoutes = require('./routes/visitantehome');
 const { verificarAutenticacionV } = require('./controllers/visitanteLoginController');
 app.use('/visitantehome', verificarAutenticacionV, visitanteRoutes);
+// Agregar ruta para añadir profesor
+app.use('/administradorhome/anadirProfesor', verificarAutenticacion, anadirProfesorRouter);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
