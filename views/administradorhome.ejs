@@ -86,7 +86,7 @@
                                 <div class="card-body p-4">
                                     <div class="row mb-3">
                                         <div class="col-md-6">
-                                            <form action="/administradorhome/buscar" method="GET" class="d-flex">
+                                            <form action="/administradorhome/buscar" method="GET" class="d-flex" id="searchForm">
                                                 <input type="text" name="termino" class="form-control me-2" placeholder="Buscar por nombre, apellido o número de trabajador" value="<%= typeof busqueda !== 'undefined' ? busqueda : '' %>">
                                                 <button type="submit" class="btn btn-primary">
                                                     <i class="bi bi-search"></i> Buscar
@@ -94,7 +94,7 @@
                                             </form>
                                         </div>
                                         <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                                            <a href="/administradorhome/descargar-excel" class="btn btn-success">
+                                            <a href="/administradorhome/descargar-excel<%= typeof busqueda !== 'undefined' && busqueda ? '?termino=' + encodeURIComponent(busqueda) : '' %>" class="btn btn-success" id="exportExcelBtn">
                                                 <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
                                             </a>
                                         </div>
@@ -168,7 +168,6 @@
                     </div>
                 </div>
             </section>
-        </main>
         
         <!-- Footer-->
         <footer class="bg-white py-4 mt-auto">
@@ -206,5 +205,24 @@
                 });
             });
         </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Actualizar el link de exportación cuando se cambia el término de búsqueda
+                const searchInput = document.querySelector('input[name="termino"]');
+                const exportBtn = document.getElementById('exportExcelBtn');
+                
+                if (searchInput && exportBtn) {
+                    searchInput.addEventListener('input', function() {
+                        const searchValue = this.value.trim();
+                        if (searchValue) {
+                            exportBtn.href = `/administradorhome/descargar-excel?termino=${encodeURIComponent(searchValue)}`;
+                        } else {
+                            exportBtn.href = '/administradorhome/descargar-excel';
+                        }
+                    });
+                }
+            });
+            </script>
     </body>
 </html>

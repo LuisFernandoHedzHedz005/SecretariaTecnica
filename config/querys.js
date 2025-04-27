@@ -3,7 +3,7 @@ const { query, pool } = require('./conexion');
 async function verificarAdministrador(usuario, contrasena) {
     console.log('Usuario recibido:', usuario);
     try {
-        const rows = await query('SELECT * FROM usuario_app WHERE usuario = ? AND contrasena = ? AND rol_id = 1 AND activo = TRUE', [usuario, contrasena]);
+        const rows = await query('SELECT * FROM usuario_app WHERE usuario = $1 AND contrasena = $2 AND rol_id = 1 AND activo = TRUE', [usuario, contrasena]);
         console.log('Resultado de verificación:', rows);
         if(rows && rows.length > 0) {
             return rows[0];
@@ -28,7 +28,7 @@ async function verificarContrasenaAdmin(usuario, contrasena) {
 
 async function verificarVisitante(usuario, contrasena) {
     try {
-        const rows = await query('SELECT * FROM usuario_app WHERE usuario = ? AND contrasena = ? AND rol_id = 2 AND activo = TRUE', [usuario, contrasena]);
+        const rows = await query('SELECT * FROM usuario_app WHERE usuario = $1 AND contrasena = $2 AND rol_id = 2 AND activo = TRUE', [usuario, contrasena]);
         console.log('Resultado de verificación:', rows);
         if(rows && rows.length > 0) {
             return rows[0];
@@ -39,6 +39,7 @@ async function verificarVisitante(usuario, contrasena) {
         return null;
     }
 }
+
 async function verificarContrasenaVisitante(usuario, contrasena) {
     try {
         const visitante = await verificarVisitante(usuario, contrasena);

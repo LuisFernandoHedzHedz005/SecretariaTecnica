@@ -45,14 +45,14 @@ const obtenerCategoriasPorProfesor = async (profesorId) => {
         cp.categoria_id,
         p.descripcion AS puesto,
         a.nombre AS asignatura,
-        DATE_FORMAT(cp.fecha_inicio, '%d/%m/%Y') AS fecha_inicio,
-        DATE_FORMAT(cp.fecha_fin, '%d/%m/%Y') AS fecha_fin
+        TO_CHAR(cp.fecha_inicio, 'DD/MM/YYYY') AS fecha_inicio,
+        TO_CHAR(cp.fecha_fin, 'DD/MM/YYYY') AS fecha_fin
       FROM 
         categoria_profesor cp
         JOIN puesto p ON cp.puesto_id = p.puesto_id
         JOIN asignatura a ON cp.asignatura_id = a.asignatura_id
       WHERE 
-        cp.profesor_id = ?
+        cp.profesor_id = $1
       ORDER BY cp.fecha_inicio DESC
     `;
     
@@ -120,15 +120,15 @@ const buscarProfesores = async (req, res) => {
         JOIN grado_academico ga ON p.grado_id = ga.grado_id
         JOIN estado_profesor ep ON p.estado_id = ep.estado_id
       WHERE 
-        p.nombre LIKE ? OR 
-        p.apellido_paterno LIKE ? OR 
-        p.apellido_materno LIKE ? OR
-        p.numero_trabajador LIKE ?
+        p.nombre ILIKE $1 OR 
+        p.apellido_paterno ILIKE $1 OR 
+        p.apellido_materno ILIKE $1 OR
+        p.numero_trabajador ILIKE $1
       ORDER BY p.apellido_paterno, p.apellido_materno, p.nombre
     `;
     
     const searchTerm = `%${termino}%`;
-    const profesores = await query(sql, [searchTerm, searchTerm, searchTerm, searchTerm]);
+    const profesores = await query(sql, [searchTerm]);
     
     // Para cada profesor, obtenemos sus categorías
     for (const profesor of profesores) {
