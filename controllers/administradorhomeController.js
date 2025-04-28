@@ -111,24 +111,32 @@ const obtenerCategoriasPorProfesor = async (profesorId) => {
 };
 
 // Función para mostrar la página principal del administrador con la tabla de profesores
-const mostrarTabla= async (req, res) => {
+const mostrarTabla = async (req, res) => {
   try {
     const profesores = await obtenerProfesores();
+    const visitantes = await obtenerVisitantes();
     
     // Para cada profesor, obtenemos sus categorías
     for (const profesor of profesores) {
       profesor.categorias = await obtenerCategoriasPorProfesor(profesor.profesor_id);
     }
     
+    // Obtener mensaje de éxito si existe
+    const success = req.query.success === 'true';
+    const message = req.query.message || '';
+    
     res.render('administradorhome', { 
       administrador: req.session.administrador,
       profesores: profesores,
-      busqueda: ''
+      visitantes: visitantes,
+      busqueda: '',
+      success: success,
+      message: message
     });
   } catch (error) {
     console.error('Error al mostrar dashboard:', error);
     res.status(500).render('error', { 
-      message: 'Error al cargar la información de profesores',
+      message: 'Error al cargar la información',
       error: { status: 500, stack: process.env.NODE_ENV === 'development' ? error.stack : '' }
     });
   }
@@ -325,10 +333,85 @@ const eliminarProfesor = async (req, res) => {
   }
 };
 
+const obtenerVisitantes = async () => {
+  try {
+    const sql = `
+      SELECT 
+        u.usuario_id,
+        u.usuario,
+        u.correo,
+        r.nombre_rol AS rol,
+        TO_CHAR(u.fecha_creacion, 'DD/MM/YYYY') AS fecha_creacion,
+        u.activo
+      FROM 
+        usuario_app u
+        JOIN rol r ON u.rol_id = r.rol_id
+      WHERE
+        r.nombre_rol = 'visitante'
+      ORDER BY u.usuario
+    `;
+    
+    const visitantes = await query(sql);
+    return visitantes;
+  } catch (error) {
+    console.error('Error al obtener visitantes:', error);
+    throw error;
+  }
+};
+
+// Función para eliminar un visitante por ID
+const eliminarVisitante = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'ID de visitante no proporcionado' });
+    }
+    
+    // Primero obtenemos los datos del visitante para log
+    const sqlGetVisitante = `
+      SELECT 
+        u.usuario, u.correo
+      FROM 
+        usuario_app u
+      WHERE 
+        u.usuario_id = $1
+    `;
+    
+    const visitanteData = await query(sqlGetVisitante, [id]);
+    
+    if (visitanteData.length === 0) {
+      return res.status(404).json({ success: false, message: 'Visitante no encontrado' });
+    }
+    
+    // Eliminar el visitante
+    const sqlDeleteVisitante = `DELETE FROM usuario_app WHERE usuario_id = $1`;
+    await query(sqlDeleteVisitante, [id]);
+    
+    // Registrar la eliminación
+    const visitante = visitanteData[0];
+    console.log(`Visitante eliminado: ${visitante.usuario} (${visitante.correo})`);
+    
+    // Responder con éxito
+    return res.json({ 
+      success: true, 
+      message: `Visitante ${visitante.usuario} eliminado correctamente` 
+    });
+  } catch (error) {
+    console.error('Error al eliminar visitante:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error al eliminar visitante', 
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno del servidor'
+    });
+  }
+};
+
 // Exportar funciones del controlador
 module.exports = {
   mostrarTabla,
   descargarExcel,
   buscarProfesores,
-  eliminarProfesor
+  eliminarProfesor,
+  eliminarVisitante
 };

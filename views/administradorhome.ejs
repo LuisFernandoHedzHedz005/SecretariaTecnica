@@ -78,6 +78,14 @@
             <!-- Page content-->
             <section class="py-5">
                 <div class="container px-5">
+                    <!-- Mensaje de éxito -->
+                    <% if (typeof success !== 'undefined' && success) { %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <%= message %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <% } %>
+                    
                     <div class="text-center mb-5">
                         <h1 class="display-5 fw-bolder mb-0"><span class="text-gradient d-inline">Gestión de Profesores</span></h1>
                     </div>
@@ -211,6 +219,70 @@
                                           </tbody>
                                         </table>
                                       </div>
+                                </div>
+                            </div>
+                                <!-- Tabla de Visitantes -->
+                                <div class="card shadow rounded-4 border-0 mb-5 mt-5">
+                                    <div class="card-body p-4">
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                        <h3 class="fw-bolder text-gradient">Gestión de Visitantes</h3>
+                                        </div>
+                                        <div class="col-md-12 text-md-end mt-3">
+                                        <a href="/administradorhome/anadirVisitante" class="btn btn-primary" id="addVisitanteBtn">
+                                            <i class="bi bi-plus-circle"></i> Añadir Visitante
+                                        </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Visitantes -->
+                                    <div class="table-container">
+                                        <table id="visitantes-table" class="table table-striped table-bordered">
+                                        <thead class="table-info">
+                                            <tr>
+                                            <th>Usuario</th>
+                                            <th>Correo</th>
+                                            <th>Rol</th>
+                                            <th>Fecha Creación</th>
+                                            <th>Estado</th>
+                                            <th class="acciones-column">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% if (visitantes && visitantes.length) { %>
+                                            <% visitantes.forEach(visitante => { %>
+                                                <tr data-visitante-id="<%= visitante.usuario_id %>">
+                                                <td><%= visitante.usuario %></td>
+                                                <td><%= visitante.correo %></td>
+                                                <td><%= visitante.rol %></td>
+                                                <td><%= visitante.fecha_creacion %></td>
+                                                <td>
+                                                    <span class="badge <%= visitante.activo ? 'bg-success' : 'bg-danger' %>">
+                                                    <%= visitante.activo ? 'Activo' : 'Inactivo' %>
+                                                    </span>
+                                                </td>
+                                                <td class="acciones-column">
+                                                    <!-- Botón Eliminar -->
+                                                    <button type="button" class="btn btn-sm btn-eliminar"
+                                                            onclick="confirmarEliminarVisitante(
+                                                            '<%= visitante.usuario_id %>',
+                                                            '<%= visitante.usuario %>'
+                                                            )">
+                                                    <i class="bi bi-trash"></i> Eliminar
+                                                    </button>
+                                                </td>
+                                                </tr>
+                                            <% }); %>
+                                            <% } else { %>
+                                            <tr>
+                                                <td colspan="6" class="text-center">
+                                                No se encontraron visitantes
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                                        </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -352,6 +424,85 @@
                     // window.location.href = `/administradorhome/detalles/${profesorId}`;
                 });
             });
+        </script>
+
+        <script>
+            $(document).ready(function() {
+            // Inicializar DataTable para visitantes
+            $('#visitantes-table').DataTable({
+                language: {
+                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+                },
+                pageLength: 10,
+                responsive: true,
+                dom: 'Bfrtip',
+                buttons: [],
+                columnDefs: [
+                { targets: -1, orderable: false } // La última columna (acciones) no es ordenable
+                ]
+            });
+            });
+        
+            // Función para confirmar eliminación de visitante
+            function confirmarEliminarVisitante(visitanteId, nombreVisitante) {
+            // Evitar que el evento se propague
+            event.stopPropagation();
+            
+            Swal.fire({
+                title: '¿Está seguro?',
+                html: `¿Realmente desea eliminar al visitante <strong>${nombreVisitante}</strong>?<br>Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                eliminarVisitante(visitanteId);
+                }
+            });
+            }
+            
+            // Función para enviar la solicitud de eliminación de visitante
+            function eliminarVisitante(visitanteId) {
+            fetch(`/administradorhome/eliminarVisitante/${visitanteId}`, {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#0d6efd'
+                }).then(() => {
+                    // Recargar la página para reflejar los cambios
+                    window.location.reload();
+                });
+                } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'No se pudo eliminar al visitante',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
+                }
+            })
+            .catch(error => {
+                console.error('Error al eliminar visitante:', error);
+                Swal.fire({
+                title: 'Error',
+                text: 'Ocurrió un error al procesar la solicitud',
+                icon: 'error',
+                confirmButtonColor: '#0d6efd'
+                });
+            });
+            }
         </script>
     </body>
 </html>
