@@ -65,7 +65,7 @@ const obtenerCategoriasPorProfesor = async (profesorId) => {
 };
 
 // Función para mostrar la página principal del visitante con la tabla de profesores
-const mostrarDashboard = async (req, res) => {
+const mostrarTabla = async (req, res) => {
   try {
     const profesores = await obtenerProfesores();
     
@@ -79,7 +79,7 @@ const mostrarDashboard = async (req, res) => {
       profesores: profesores
     });
   } catch (error) {
-    console.error('Error al mostrar dashboard:', error);
+    console.error('Error al mostrar la Tabla:', error);
     res.status(500).render('error', { 
       message: 'Error al cargar la información de profesores',
       error: { status: 500, stack: process.env.NODE_ENV === 'development' ? error.stack : '' }
@@ -151,6 +151,6 @@ const buscarProfesores = async (req, res) => {
 
 // Exportar funciones del controlador
 module.exports = {
-  mostrarDashboard,
+  mostrarTabla,
   buscarProfesores
 };

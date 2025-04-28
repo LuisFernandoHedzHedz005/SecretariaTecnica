@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="Sistema de gestión de profesores" />
         <meta name="author" content="Ingeniería Mecánica" />
-        <title>Dashboard Administrador - Profesores</title>
+        <title>Tabla Administrador - Profesores</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="/image/favicon.ico" />
         <!-- Google Font-->
@@ -68,7 +68,7 @@
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 small fw-bolder">
                             <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/administradorhome">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/administradorhome">Tabla</a></li>
                             <li class="nav-item"><a class="nav-link" href="/administradorLogin/logout">Cerrar Sesión</a></li>
                         </ul>
                     </div>
@@ -118,76 +118,99 @@
                                             </a>
                                         </div>
                                     </div>
-                                    
                                     <!-- Profesores -->
                                     <div class="table-container">
                                         <table id="profesores-table" class="table table-striped table-bordered">
-                                            <thead class="table-primary">
-                                                <tr>
-                                                    <th>No. Trabajador</th>
-                                                    <th>Nombre</th>
-                                                    <th>Género</th>
-                                                    <th>Grado</th>
-                                                    <th>Correo</th>
-                                                    <th>Teléfonos</th>
-                                                    <th>Antigüedad</th>
-                                                    <th>Estado</th>
-                                                    <th>Categorías</th>
-                                                    <th class="acciones-column">Acciones</th>
+                                          <thead class="table-primary">
+                                            <tr>
+                                              <th>No. Trabajador</th>
+                                              <th>Nombre</th>
+                                              <th>Género</th>
+                                              <th>Grado</th>
+                                              <th>Correo</th>
+                                              <th>Teléfonos</th>
+                                              <th>Antigüedad</th>
+                                              <th>Estado</th>
+                                              <th>Categorías</th>
+                                              <th class="acciones-column">Acciones</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            <% if (profesores && profesores.length) { %>
+                                              <% profesores.forEach(profesor => { %>
+                                                <tr data-profesor-id="<%= profesor.profesor_id %>">
+                                                  <td><%= profesor.numero_trabajador %></td>
+                                                  <td>
+                                                    <%= profesor.nombre %>
+                                                    <%= profesor.apellido_paterno %>
+                                                    <%= profesor.apellido_materno %>
+                                                  </td>
+                                                  <td><%= profesor.genero %></td>
+                                                  <td><%= profesor.grado_academico %></td>
+                                                  <td><%= profesor.correo_institucional %></td>
+                                                  <td>
+                                                    <% if (profesor.telefono_casa) { %>
+                                                      <strong>Casa:</strong> <%= profesor.telefono_casa %><br>
+                                                    <% } %>
+                                                    <% if (profesor.telefono_celular) { %>
+                                                      <strong>Celular:</strong> <%= profesor.telefono_celular %>
+                                                    <% } %>
+                                                  </td>
+                                                  <td>
+                                                    <strong>UNAM:</strong> <%= profesor.antiguedad_unam %> años<br>
+                                                    <strong>Carrera:</strong> <%= profesor.antiguedad_carrera %> años
+                                                  </td>
+                                                  <td>
+                                                    <span class="badge 
+                                                      <%= profesor.estado === 'Activo'      ? 'bg-success'
+                                                         : profesor.estado === 'Retirado'   ? 'bg-secondary'
+                                                         : profesor.estado === 'Incapacitado' ? 'bg-warning'
+                                                         : 'bg-info' %>">
+                                                      <%= profesor.estado %>
+                                                    </span>
+                                                  </td>
+                                                  <td>
+                                                    <% if (profesor.categorias && profesor.categorias.length) { %>
+                                                      <% profesor.categorias.forEach(cat => { %>
+                                                        <span class="badge bg-primary categoria-badge">
+                                                          <%= cat.puesto %> – <%= cat.asignatura %>
+                                                          <% if (cat.fecha_inicio) { %>
+                                                            (<%= cat.fecha_inicio %>
+                                                            <%= cat.fecha_fin ? ' a ' + cat.fecha_fin : '' %>)
+                                                          <% } %>
+                                                        </span>
+                                                      <% }); %>
+                                                    <% } else { %>
+                                                      <em>Sin categorías asignadas</em>
+                                                    <% } %>
+                                                  </td>
+                                                  <td class="acciones-column">
+                                                    <!-- Botón Editar -->
+                                                    <a href="/administradorhome/editarProfesor/<%= profesor.profesor_id %>"
+                                                       class="btn btn-warning btn-sm">
+                                                      <i class="bi bi-pencil-fill"></i> Editar
+                                                    </a>
+                                                    <!-- Botón Eliminar -->
+                                                    <button type="button" class="btn btn-sm btn-eliminar"
+                                                            onclick="confirmarEliminarProfesor(
+                                                              '<%= profesor.profesor_id %>',
+                                                              '<%= profesor.nombre %> <%= profesor.apellido_paterno %> <%= profesor.apellido_materno %>'
+                                                            )">
+                                                      <i class="bi bi-trash"></i> Eliminar
+                                                    </button>
+                                                  </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                <% if (typeof profesores !== 'undefined' && profesores.length > 0) { %>
-                                                    <% profesores.forEach(profesor => { %>
-                                                        <tr class="profesor-row" data-profesor-id="<%= profesor.profesor_id %>">
-                                                            <td><%= profesor.numero_trabajador %></td>
-                                                            <td><%= profesor.nombre %> <%= profesor.apellido_paterno %> <%= profesor.apellido_materno %></td>
-                                                            <td><%= profesor.genero %></td>
-                                                            <td><%= profesor.grado_academico %></td>
-                                                            <td><%= profesor.correo_institucional %></td>
-                                                            <td>
-                                                                <% if (profesor.telefono_casa) { %>
-                                                                    <strong>Casa:</strong> <%= profesor.telefono_casa %><br>
-                                                                <% } %>
-                                                                <% if (profesor.telefono_celular) { %>
-                                                                    <strong>Celular:</strong> <%= profesor.telefono_celular %>
-                                                                <% } %>
-                                                            </td>
-                                                            <td>
-                                                                <strong>UNAM:</strong> <%= profesor.antiguedad_unam %> años<br>
-                                                                <strong>Carrera:</strong> <%= profesor.antiguedad_carrera %> años
-                                                            </td>
-                                                            <td><span class="badge <%= profesor.estado === 'Activo' ? 'bg-success' : profesor.estado === 'Retirado' ? 'bg-secondary' : profesor.estado === 'Incapacitado' ? 'bg-warning' : 'bg-info' %>"><%= profesor.estado %></span></td>
-                                                            <td>
-                                                                <% if (profesor.categorias && profesor.categorias.length > 0) { %>
-                                                                    <% profesor.categorias.forEach(cat => { %>
-                                                                        <span class="badge bg-primary categoria-badge">
-                                                                            <%= cat.puesto %> - <%= cat.asignatura %>
-                                                                            <% if (cat.fecha_inicio) { %>
-                                                                                (<%= cat.fecha_inicio %><%= cat.fecha_fin ? ' a ' + cat.fecha_fin : '' %>)
-                                                                            <% } %>
-                                                                        </span>
-                                                                    <% }); %>
-                                                                <% } else { %>
-                                                                    <em>Sin categorías asignadas</em>
-                                                                <% } %>
-                                                            </td>
-                                                            <td class="acciones-column">
-                                                                <button type="button" class="btn btn-sm btn-eliminar" 
-                                                                    onclick="confirmarEliminarProfesor('<%= profesor.profesor_id %>', '<%= profesor.nombre %> <%= profesor.apellido_paterno %> <%= profesor.apellido_materno %>')">
-                                                                    <i class="bi bi-trash"></i> Eliminar
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    <% }); %>
-                                                <% } else { %>
-                                                    <tr>
-                                                        <td colspan="10" class="text-center">No se encontraron profesores</td>
-                                                    </tr>
-                                                <% } %>
-                                            </tbody>
+                                              <% }); %>
+                                            <% } else { %>
+                                              <tr>
+                                                <td colspan="10" class="text-center">
+                                                  No se encontraron profesores
+                                                </td>
+                                              </tr>
+                                            <% } %>
+                                          </tbody>
                                         </table>
-                                    </div>
+                                      </div>
                                 </div>
                             </div>
                         </div>

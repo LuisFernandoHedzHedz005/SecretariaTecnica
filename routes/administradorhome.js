@@ -14,9 +14,10 @@ module.exports = router;
 const express = require('express');
 const router = express.Router();
 const administradorhomeController = require('../controllers/administradorhomeController');
+const editarProfesor = require('../controllers/editarProfesorController');
 
 // Ruta para el dashboard principal
-router.get('/', administradorhomeController.mostrarDashboard);
+router.get('/', administradorhomeController.mostrarTabla);;
 
 // Ruta para descargar el Excel
 router.get('/descargar-excel', administradorhomeController.descargarExcel);
@@ -26,5 +27,8 @@ router.get('/buscar', administradorhomeController.buscarProfesores);
 
 // Ruta para eliminar un profesor
 router.delete('/eliminar/:id', administradorhomeController.eliminarProfesor);
+
+router.get('/editarProfesor/:id', editarProfesor.mostrarFormulario);
+router.post('/editarProfesor/:id', editarProfesor.actualizarProfesor);
 
 module.exports = router;

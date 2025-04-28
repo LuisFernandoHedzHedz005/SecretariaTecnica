@@ -15,7 +15,7 @@ const router = express.Router();
 const visitantehomeController = require('../controllers/visitantehomeController');
 
 // Ruta para el dashboard principal
-router.get('/', visitantehomeController.mostrarDashboard);
+router.get('/', visitantehomeController.mostrarTabla);
 
 // Ruta para buscar profesores
 router.get('/buscar', visitantehomeController.buscarProfesores);

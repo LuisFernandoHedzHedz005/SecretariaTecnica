@@ -111,7 +111,7 @@ const obtenerCategoriasPorProfesor = async (profesorId) => {
 };
 
 // Función para mostrar la página principal del administrador con la tabla de profesores
-const mostrarDashboard = async (req, res) => {
+const mostrarTabla= async (req, res) => {
   try {
     const profesores = await obtenerProfesores();
     
@@ -327,7 +327,7 @@ const eliminarProfesor = async (req, res) => {
 
 // Exportar funciones del controlador
 module.exports = {
-  mostrarDashboard,
+  mostrarTabla,
   descargarExcel,
   buscarProfesores,
   eliminarProfesor

@@ -8,7 +8,8 @@ const sugerenciasRouter = require('./routes/sugerencias');
 const contactoRouter = require('./routes/contacto');
 const administradorRoutes = require('./routes/administradorhome');
 const visitanteRoutes = require('./routes/visitantehome');
-anadirProfesorRouter = require('./routes/anadirProfesor');
+const anadirProfesorRouter = require('./routes/anadirProfesor');
+const editarProfesorRouter = require('./routes/editarProfesor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,7 +32,7 @@ app.use(session({
 }));
 
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: true }));
 
 // Configura la carpeta de archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
@@ -62,6 +63,8 @@ const { verificarAutenticacionV } = require('./controllers/visitanteLoginControl
 app.use('/visitantehome', verificarAutenticacionV, visitanteRoutes);
 // Agregar ruta para añadir profesor
 app.use('/administradorhome/anadirProfesor', verificarAutenticacion, anadirProfesorRouter);
+// Agregar ruta para editar profesor
+app.use('/administradorhome/editarProfesor', verificarAutenticacion, editarProfesorRouter);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
