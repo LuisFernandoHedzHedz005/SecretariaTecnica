@@ -15,6 +15,7 @@ const express = require('express');
 const router = express.Router();
 const administradorhomeController = require('../controllers/administradorhomeController');
 const editarProfesor = require('../controllers/editarProfesorController');
+const anadirVisitante = require('../controllers/anadirVisitanteController');
 
 // Ruta para el dashboard principal
 router.get('/', administradorhomeController.mostrarTabla);;
@@ -30,5 +31,11 @@ router.delete('/eliminar/:id', administradorhomeController.eliminarProfesor);
 
 router.get('/editarProfesor/:id', editarProfesor.mostrarFormulario);
 router.post('/editarProfesor/:id', editarProfesor.actualizarProfesor);
+
+
+router.delete('/eliminarVisitante/:id', administradorhomeController.eliminarVisitante);
+router.get('/anadirVisitante', anadirVisitante.mostrarFormulario);
+router.post('/anadirVisitante', anadirVisitante.guardarVisitante);
+
 
 module.exports = router;
