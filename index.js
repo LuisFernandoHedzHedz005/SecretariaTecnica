@@ -23,21 +23,26 @@ app.set('views', __dirname + '/views');
 // Configura el motor de plantillas
 app.set('view engine', 'ejs');
 
+// Determinar el entorno (desarrollo o producción)
+const isProduction = process.env.NODE_ENV === 'production';
+
 // Configuración de la sesión con PostgreSQL como store
 app.use(session({
     store: new pgSession({
         pool: pool,                 // Usar el pool de conexiones existente
         tableName: 'session',       // Nombre de la tabla para las sesiones
-        createTableIfMissing: false  // Intentar crear la tabla si no existe
+        createTableIfMissing: true  // Crear la tabla si no existe
     }),
     secret: process.env.SESSION_SECRET || 'me_gustan_las_cookie',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: true,  
+        secure: isProduction ? 'auto' : false,  // True en producción con HTTPS, false en desarrollo
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
-    }
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        sameSite: 'lax'  // Ayuda con problemas de cookies en redirecciones
+    },
+    proxy: isProduction  // Necesario cuando trabajas detrás de un proxy como en Render
 }));
 
 app.use(express.json());
