@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/LuisFernandoHedzHedz005/SecretariaTecnica#readme",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",

@@ -1,13 +1,23 @@
+require('dotenv').config();
 const { Pool } = require('pg');
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'Dracohunter#190603',
-  database: process.env.DB_NAME || 'profesores',
-  max: 10, 
-  idleTimeoutMillis: 30000 
-});
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false },
+        max: 10,
+        idleTimeoutMillis: 30000
+      }
+    : {
+        host:     process.env.DB_HOST     || 'localhost',
+        user:     process.env.DB_USER     || 'root',
+        password: process.env.DB_PASSWORD || 'Dracohunter#190603',
+        database: process.env.DB_NAME     || 'profesores',
+        max: 10,
+        idleTimeoutMillis: 30000
+      }
+);
 
 pool.on('connect', (client) => {
   console.log(`Nueva conexión establecida`);
