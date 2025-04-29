@@ -266,6 +266,9 @@ const buscarProfesores = async (req, res) => {
     
     const profesores = await buscarProfesoresPorTermino(termino);
     
+    // Obtener los visitantes también
+    const visitantes = await obtenerVisitantes();
+    
     // Para cada profesor, obtenemos sus categorías
     for (const profesor of profesores) {
       profesor.categorias = await obtenerCategoriasPorProfesor(profesor.profesor_id);
@@ -274,7 +277,10 @@ const buscarProfesores = async (req, res) => {
     res.render('administradorhome', { 
       administrador: req.session.administrador,
       profesores: profesores,
-      busqueda: termino
+      visitantes: visitantes, // Añadimos esta variable
+      busqueda: termino,
+      success: false, // Valores por defecto para evitar errores
+      message: ''
     });
   } catch (error) {
     console.error('Error al buscar profesores:', error);
