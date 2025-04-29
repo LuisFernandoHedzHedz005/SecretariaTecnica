@@ -1,11 +1,10 @@
 const { verificarAdministrador } = require('../config/querys');
-const session = require('express-session');
 
 // Función para mostrar el formulario de login
 const mostrarFormularioLogin = (req, res) => {
     // Verificar si ya hay una sesión activa
     if (req.session && req.session.administrador) {
-        return res.redirect('/administradorhome'); // Redirigir a la pagina buena 
+        return res.redirect('/administradorhome');
     }
     
     // Pasar mensaje de error si existe
@@ -20,6 +19,8 @@ const mostrarFormularioLogin = (req, res) => {
 const procesarLogin = async (req, res) => {
     try {
         const { username, password } = req.body;
+        console.log('Intento de login:', { username });
+        
         if (!username || !password) {
             req.session.errorMsg = 'Por favor introduce usuario y contraseña';
             return res.redirect('/administradorLogin');
@@ -27,9 +28,10 @@ const procesarLogin = async (req, res) => {
         
         // Verificar las credenciales
         const admin = await verificarAdministrador(username, password);
+        console.log('Resultado verificación admin:', admin ? 'Autenticado' : 'No autenticado');
         
         if (admin) {
-            // Aqui guardamos los datos
+            // Aqui guardamos los datos en sesión
             req.session.administrador = {
                 id: admin.usuario_id,
                 usuario: admin.usuario,
@@ -37,9 +39,21 @@ const procesarLogin = async (req, res) => {
                 rol: admin.rol_id
             };
 
-            return res.redirect('/administradorhome');
+            // Asegurarnos de que la sesión se guarde antes de redirigir
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Error al guardar la sesión:', err);
+                    req.session.errorMsg = 'Error interno, por favor intenta nuevamente';
+                    return res.redirect('/administradorLogin');
+                }
+                
+                console.log('Sesión guardada, redirigiendo a administradorhome');
+                console.log('Datos de sesión:', req.session);
+                return res.redirect('/administradorhome');
+            });
         } else {
             // Credenciales inválidas
+            console.log('Credenciales inválidas');
             req.session.errorMsg = 'Usuario o contraseña incorrectos';
             return res.redirect('/administradorLogin');
         }
@@ -62,9 +76,12 @@ const cerrarSesion = (req, res) => {
 
 // Middleware para verificar si el usuario está autenticado
 const verificarAutenticacion = (req, res, next) => {
+    console.log('Verificando autenticación:', req.session);
     if (req.session && req.session.administrador) {
+        console.log('Usuario autenticado:', req.session.administrador.usuario);
         return next();
     } else {
+        console.log('Usuario no autenticado, redirigiendo a login');
         req.session.errorMsg = 'Debes iniciar sesión para acceder';
         return res.redirect('/administradorLogin');
     }

@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/LuisFernandoHedzHedz005/SecretariaTecnica#readme",
   "dependencies": {
+    "connect-pg-simple": "^10.0.0",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "exceljs": "^4.4.0",
