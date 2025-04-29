@@ -1,19 +1,30 @@
 const { query, pool } = require('./conexion'); 
 
-async function verificarAdministrador(usuario, contrasena) {
-    console.log('Usuario recibido:', usuario);
+const verificarAdministrador = async (usuario, contrasena) => {
     try {
-        const rows = await query('SELECT * FROM usuario_app WHERE usuario = $1 AND contrasena = $2 AND rol_id = 1 AND activo = TRUE', [usuario, contrasena]);
-        console.log('Resultado de verificación:', rows);
-        if(rows && rows.length > 0) {
-            return rows[0];
+        console.log(`Verificando administrador: ${usuario}`);
+        // Ajustar la consulta según tu estructura de base de datos
+        const sqlQuery = `
+            SELECT * FROM usuario_app 
+            WHERE usuario = $1 
+            AND contrasena = $2 
+            AND activo = true
+            AND rol_id = 1`;
+        
+        const resultado = await conexion.query(sqlQuery, [usuario, contrasena]);
+        console.log('Resultado de verificación:', resultado);
+        
+        // Verificar si se encontró un usuario
+        if (resultado && resultado.length > 0) {
+            return resultado[0]; // Devolver los datos del administrador
+        } else {
+            return null; // No se encontró ningún administrador con esas credenciales
         }
-        return null;
     } catch (error) {
-        console.error('Error al verificar administrador:', error);
-        return null;
+        console.error('Error en verificarAdministrador:', error);
+        throw error;
     }
-}
+};
 
 async function verificarContrasenaAdmin(usuario, contrasena) {
     try {

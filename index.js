@@ -28,13 +28,13 @@ app.use(session({
     store: new pgSession({
         pool: pool,                 // Usar el pool de conexiones existente
         tableName: 'session',       // Nombre de la tabla para las sesiones
-        createTableIfMissing: true  // Intentar crear la tabla si no existe
+        createTableIfMissing: false  // Intentar crear la tabla si no existe
     }),
     secret: process.env.SESSION_SECRET || 'me_gustan_las_cookie',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: true,  // Cambia a true cuando confirmes que Render usa HTTPS
+        secure: true,  
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 24 horas
     }

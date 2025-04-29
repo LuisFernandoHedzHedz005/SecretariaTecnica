@@ -18,8 +18,11 @@ const mostrarFormularioLogin = (req, res) => {
 // Función para procesar el login
 const procesarLogin = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        console.log('Intento de login:', { username });
+        const username = req.body.username || req.body.usuario; 
+        const password = req.body.password || req.body.contrasena;
+        
+        console.log('Datos recibidos para login:', { username });
+        console.log('Nombres de los campos en req.body:', Object.keys(req.body));
         
         if (!username || !password) {
             req.session.errorMsg = 'Por favor introduce usuario y contraseña';
@@ -39,6 +42,8 @@ const procesarLogin = async (req, res) => {
                 rol: admin.rol_id
             };
 
+            console.log('Datos de administrador guardados en sesión:', req.session.administrador);
+
             // Asegurarnos de que la sesión se guarde antes de redirigir
             req.session.save((err) => {
                 if (err) {
@@ -47,8 +52,8 @@ const procesarLogin = async (req, res) => {
                     return res.redirect('/administradorLogin');
                 }
                 
-                console.log('Sesión guardada, redirigiendo a administradorhome');
-                console.log('Datos de sesión:', req.session);
+                console.log('Sesión guardada correctamente, redirigiendo a administradorhome');
+                console.log('Datos completos de la sesión:', req.session);
                 return res.redirect('/administradorhome');
             });
         } else {
@@ -76,7 +81,7 @@ const cerrarSesion = (req, res) => {
 
 // Middleware para verificar si el usuario está autenticado
 const verificarAutenticacion = (req, res, next) => {
-    console.log('Verificando autenticación:', req.session);
+    console.log('Verificando autenticación, datos de sesión:', req.session);
     if (req.session && req.session.administrador) {
         console.log('Usuario autenticado:', req.session.administrador.usuario);
         return next();
