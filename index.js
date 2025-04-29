@@ -22,7 +22,8 @@ app.set('view engine', 'ejs');
 
 // Configuración de la sesión
 app.use(session({
-    secret: 'me_gustan_las_cookie',
+    //secret: 'me_gustan_las_cookie',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
