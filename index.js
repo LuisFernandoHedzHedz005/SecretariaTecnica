@@ -34,7 +34,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: false,  // Cambia a true cuando confirmes que Render usa HTTPS
+        secure: true,  // Cambia a true cuando confirmes que Render usa HTTPS
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 24 horas
     }
