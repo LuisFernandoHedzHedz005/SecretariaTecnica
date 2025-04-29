@@ -11,7 +11,7 @@ const verificarAdministrador = async (usuario, contrasena) => {
             AND activo = true
             AND rol_id = 1`;
         
-        const resultado = await conexion.query(sqlQuery, [usuario, contrasena]);
+        const resultado = await query(sqlQuery, [usuario, contrasena]);
         console.log('Resultado de verificación:', resultado);
         
         // Verificar si se encontró un usuario
