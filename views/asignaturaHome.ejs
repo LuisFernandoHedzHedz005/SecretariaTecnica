@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Sistema de gestión de asignaturas" />
+        <meta name="author" content="Ingeniería Mecánica" />
+        <title>Tabla Administrador - Asignaturas</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="/image/favicon.ico" />
+        <!-- Google Font-->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- DataTables CSS -->
+        <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+        <!-- SweetAlert2 -->
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->       
+        <link href="/css/styles.css" rel="stylesheet" />
+        <style>
+            .text-gradient {
+                background: linear-gradient(45deg, #0061f2, #6900c7);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+            .asignatura-row:hover {
+                background-color: #f8f9fa;
+                cursor: pointer;
+            }
+            .btn-eliminar {
+                color: #fff;
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }
+            .btn-eliminar:hover {
+                color: #fff;
+                background-color: #c82333;
+                border-color: #bd2130;
+            }
+            .acciones-column {
+                width: 100px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body class="d-flex flex-column h-100">
+        <main class="flex-shrink-0">
+            <!-- Navar-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+                <div class="container px-5">
+                    <a class="navbar-brand" href="/"><span class="fw-bolder text-primary">Ingeniería Mecánica - Secretaría Técnica</span></a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 small fw-bolder">
+                            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/administradorhome">Tabla</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/administradorLogin/logout">Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Page content-->
+            <section class="py-5">
+                <div class="container px-5">
+                    <!-- Mensaje de éxito -->
+                    <% if (typeof success !== 'undefined' && success) { %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <%= message %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <% } %>
+                    
+                    <div class="text-center mb-5">
+                        <h1 class="display-5 fw-bolder mb-0"><span class="text-gradient d-inline">Gestión de Asignaturas</span></h1>
+                    </div>
+                    
+                    <div class="row gx-5">
+                        <div class="col-12">
+                            <!-- Dashboard card -->
+                            <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
+                                <div class="card-body p-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="p-5 w-100">
+                                            <h2 class="fw-bolder">Bienvenido, <%= administrador.usuario %></h2>
+                                            <p>Correo: <%= administrador.correo %></p>
+                                            <p>Panel de administración para gestionar la información de asignaturas.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Tabla de Asignaturas -->
+                            <div class="card shadow rounded-4 border-0 mb-5">
+                                <div class="card-body p-4">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <h3 class="fw-bolder">Lista de Asignaturas</h3>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <a href="/administradorhome" class="btn btn-secondary">
+                                                <i class="bi bi-arrow-left"></i> Volver a Profesores
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Asignaturas -->
+                                    <div class="table-container">
+                                        <table id="asignaturas-table" class="table table-striped table-bordered">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th>Nombre de Asignatura</th>
+                                                    <th class="acciones-column">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% if (asignatura && asignatura.length) { %>
+                                                    <% asignatura.forEach(asig => { %>
+                                                        <tr data-asignatura-id="<%= asig.asignatura_id %>">
+                                                            <td><%= asig.nombre %></td>
+                                                            <td class="acciones-column">
+                                                                <!-- Botón Eliminar -->
+                                                                <button type="button" class="btn btn-sm btn-eliminar"
+                                                                        onclick="confirmarEliminarAsignatura(
+                                                                            '<%= asig.asignatura_id %>',
+                                                                            '<%= asig.nombre %>'
+                                                                        )">
+                                                                    <i class="bi bi-trash"></i> Eliminar
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    <% }); %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="2" class="text-center">
+                                                            No se encontraron asignaturas
+                                                        </td>
+                                                    </tr>
+                                                <% } %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Formulario para añadir asignatura -->
+                            <div class="card shadow rounded-4 border-0 mb-5">
+                                <div class="card-body p-4">
+                                    <h3 class="fw-bolder mb-3">Añadir Nueva Asignatura</h3>
+                                    
+                                    <form id="formAnadirAsignatura" class="row g-3">
+                                        <div class="col-md-8">
+                                            <label for="nombreAsignatura" class="form-label">Nombre de Asignatura</label>
+                                            <input type="text" class="form-control" id="nombreAsignatura" name="nombre" required>
+                                        </div>
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-plus-circle"></i> Añadir Asignatura
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer-->
+        <footer class="bg-white py-4 mt-auto">
+            <div class="container px-5">
+                <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                    <div class="col-auto"><div class="small m-0">Copyright &copy; Ingeniería Mecánica 2025</div></div>
+                    <div class="col-auto">
+                        <a class="small" href="https://www.aragon.unam.mx/fes-aragon/public_html/documents/aviso-de-privacidad/integral-de-la-fes-aragon.pdf">Privacidad</a>
+                        <span class="mx-1">&middot;</span>
+                        <a class="small" href="https://www.aragon.unam.mx/fes-aragon/#!/inicio">FESAragon</a>
+                        <span class="mx-1">&middot;</span>
+                        <a class="small" href="/contacto">Contacto</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- DataTables JS -->
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+        
+        <script>
+            $(document).ready(function() {
+                // Inicializar DataTable para asignaturas
+                $('#asignaturas-table').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+                    },
+                    pageLength: 10,
+                    responsive: true,
+                    dom: 'Bfrtip',
+                    buttons: [],
+                    columnDefs: [
+                        { targets: -1, orderable: false } 
+                    ]
+                });
+                
+                // Manejar envío del formulario para añadir asignatura
+                $('#formAnadirAsignatura').on('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const nombreAsignatura = $('#nombreAsignatura').val().trim();
+                    
+                    if (!nombreAsignatura) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'El nombre de la asignatura es obligatorio',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        return;
+                    }
+                    
+                    // Enviar solicitud AJAX para añadir la asignatura
+                    $.ajax({
+                        url: '/asignaturaHome/anadir',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ nombre: nombreAsignatura }),
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: '¡Éxito!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonColor: '#0d6efd'
+                                }).then(() => {
+                                    // Limpiar el formulario
+                                    $('#nombreAsignatura').val('');
+                                    
+                                    // Añadir la nueva asignatura a la tabla sin recargar la página
+                                    const table = $('#asignaturas-table').DataTable();
+                                    const newRow = table.row.add([
+                                        response.nombre,
+                                        `<button type="button" class="btn btn-sm btn-eliminar" 
+                                           onclick="confirmarEliminarAsignatura('${response.asignatura_id}', '${response.nombre}')">
+                                           <i class="bi bi-trash"></i> Eliminar
+                                        </button>`
+                                    ]).draw().node();
+                                    
+                                    // Añadir el atributo data-asignatura-id a la fila
+                                    $(newRow).attr('data-asignatura-id', response.asignatura_id);
+                                    
+                                    // Resaltar brevemente la nueva fila
+                                    $(newRow).addClass('bg-light');
+                                    setTimeout(function() {
+                                        $(newRow).removeClass('bg-light');
+                                    }, 2000);
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: response.message,
+                                    icon: 'error',
+                                    confirmButtonColor: '#0d6efd'
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            let errorMessage = 'Error al procesar la solicitud';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+                            
+                            Swal.fire({
+                                title: 'Error',
+                                text: errorMessage,
+                                icon: 'error',
+                                confirmButtonColor: '#0d6efd'
+                            });
+                        }
+                    });
+                });
+            });
+            
+            // Función para confirmar eliminación de asignatura
+            function confirmarEliminarAsignatura(asignaturaId, nombreAsignatura) {
+                // Evitar que el evento se propague
+                event.stopPropagation();
+                
+                Swal.fire({
+                    title: '¿Está seguro?',
+                    html: `¿Realmente desea eliminar la asignatura <strong>${nombreAsignatura}</strong>?<br>Esta acción no se puede deshacer.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        eliminarAsignatura(asignaturaId);
+                    }
+                });
+            }
+            
+            // Función para enviar la solicitud de eliminación de asignatura
+            function eliminarAsignatura(asignaturaId) {
+                fetch(`/asignaturaHome/eliminar/${asignaturaId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonColor: '#0d6efd'
+                        }).then(() => {
+                            // Eliminar la fila de la tabla sin recargar la página
+                            const table = $('#asignaturas-table').DataTable();
+                            const row = $(`tr[data-asignatura-id="${asignaturaId}"]`);
+                            table.row(row).remove().draw();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'No se pudo eliminar la asignatura',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al eliminar asignatura:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al procesar la solicitud',
+                        icon: 'error',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                });
+            }
+        </script>
+    </body>
+</html>

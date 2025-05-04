@@ -13,6 +13,7 @@ const administradorRoutes = require('./routes/administradorhome');
 const visitanteRoutes = require('./routes/visitantehome');
 const anadirProfesorRouter = require('./routes/anadirProfesor');
 const editarProfesorRouter = require('./routes/editarProfesor');
+const asignaturaHomeRouter = require('./routes/asignaturaHome');
 
 const app = express();
 const PORT = process.env.PORT || 10000; // Render normalmente usa PORT=10000
@@ -89,6 +90,9 @@ app.use('/administradorhome/anadirProfesor', verificarAutenticacion, anadirProfe
 
 // Agregar ruta para editar profesor
 app.use('/administradorhome/editarProfesor', verificarAutenticacion, editarProfesorRouter);
+
+// Agregar ruta para asignatura
+app.use('/asignaturaHome', verificarAutenticacion, asignaturaHomeRouter);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
