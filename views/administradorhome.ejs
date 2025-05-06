@@ -100,6 +100,9 @@
                                             <h2 class="fw-bolder">Bienvenido, <%= administrador.usuario %></h2>
                                             <p>Correo: <%= administrador.correo %></p>
                                             <p>Panel de administración para gestionar la información de profesores.</p>
+                                            <a href="/administradorhome/importarProfesores" class="btn btn-success">
+                                                <i class="fas fa-file-import"></i> Importar Profesores (Excel)
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -132,32 +135,44 @@
                                     <!-- Profesores -->
                                     <div class="table-container">
                                         <table id="profesores-table" class="table table-striped table-bordered">
-                                          <thead class="table-primary">
-                                            <tr>
-                                              <th>No. Trabajador</th>
-                                              <th>Nombre</th>
-                                              <th>Género</th>
-                                              <th>Grado</th>
-                                              <th>Correo</th>
-                                              <th>Teléfonos</th>
-                                              <th>Antigüedad</th>
-                                              <th>Estado</th>
-                                              <th>Categorías</th>
-                                              <th class="acciones-column">Acciones</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                            <% if (profesores && profesores.length) { %>
-                                              <% profesores.forEach(profesor => { %>
-                                                <tr data-profesor-id="<%= profesor.profesor_id %>">
-                                                  <td><%= profesor.numero_trabajador %></td>
-                                                  <td>
-                                                    <%= profesor.nombre %>
-                                                    <%= profesor.apellido_paterno %>
-                                                    <%= profesor.apellido_materno %>
-                                                  </td>
-                                                  <td><%= profesor.genero %></td>
-                                                  <td><%= profesor.grado_academico %></td>
+                                            <thead class="table-primary">
+                                                <tr>
+                                                  <th>No. Trabajador</th>
+                                                  <th>Nombre</th>
+                                                  <th>Género</th>
+                                                  <th>RFC</th>              
+                                                  <th>CURP</th>           
+                                                  <th>Dirección</th>        
+                                                  <th>Grado</th>
+                                                  <th>Correo</th>
+                                                  <th>Teléfonos</th>
+                                                  <th>Antigüedad</th>
+                                                  <th>Estado</th>
+                                                  <th>Categorías</th>
+                                                  <th class="acciones-column">Acciones</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                <% if (profesores && profesores.length) { %>
+                                                  <% profesores.forEach(profesor => { %>
+                                                    <tr data-profesor-id="<%= profesor.profesor_id %>">
+                                                      <td><%= profesor.numero_trabajador %></td>
+                                                      <td>
+                                                        <%= profesor.nombre %>
+                                                        <%= profesor.apellido_paterno %>
+                                                        <%= profesor.apellido_materno %>
+                                                      </td>
+                                                      <td><%= profesor.genero %></td>
+                                                      <td><%= profesor.rfc %></td>              
+                                                      <td><%= profesor.curp %></td>            
+                                                      <td>
+                                                        <%= profesor.direccion.substring(0, 20) %>...
+                                                        <button class="btn btn-sm btn-link ver-direccion" 
+                                                                data-direccion="<%= profesor.direccion %>">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                    </td>       
+                                                      <td><%= profesor.grado_academico %></td>
                                                   <td><%= profesor.correo_institucional %></td>
                                                   <td>
                                                     <% if (profesor.telefono_casa) { %>
@@ -329,7 +344,7 @@
                     dom: 'Bfrtip',
                     buttons: [],
                     columnDefs: [
-                        { targets: -1, orderable: false } // La última columna (acciones) no es ordenable
+                        { targets: -1, orderable: false } // La última columna no es ordenable
                     ]
                 });
             });
@@ -421,15 +436,21 @@
                     if ($(e.target).closest('.btn-eliminar').length) {
                         return;
                     }
-                    
-                    // Aquí puedes agregar código para navegar a la página de detalles del profesor
-                    // const profesorId = $(this).data('profesor-id');
-                    // window.location.href = `/administradorhome/detalles/${profesorId}`;
+
                 });
             });
         </script>
 
         <script>
+            $(document).on('click', '.ver-direccion', function() {
+                const direccion = $(this).data('direccion');
+                Swal.fire({
+                    title: 'Dirección completa',
+                    text: direccion,
+                    icon: 'info'
+                });
+            });
+            
             $(document).ready(function() {
             // Inicializar DataTable para visitantes
             $('#visitantes-table').DataTable({

@@ -16,6 +16,7 @@ const router = express.Router();
 const administradorhomeController = require('../controllers/administradorhomeController');
 const editarProfesor = require('../controllers/editarProfesorController');
 const anadirVisitante = require('../controllers/anadirVisitanteController');
+const subirCatalogo = require('../controllers/administradorhomeController');
 
 // Ruta para el dashboard principal
 router.get('/', administradorhomeController.mostrarTabla);;
@@ -29,13 +30,17 @@ router.get('/buscar', administradorhomeController.buscarProfesores);
 // Ruta para eliminar un profesor
 router.delete('/eliminar/:id', administradorhomeController.eliminarProfesor);
 
+// Ruta para editar un profesor
 router.get('/editarProfesor/:id', editarProfesor.mostrarFormulario);
 router.post('/editarProfesor/:id', editarProfesor.actualizarProfesor);
 
-
+//Ruta para visitantes
 router.delete('/eliminarVisitante/:id', administradorhomeController.eliminarVisitante);
 router.get('/anadirVisitante', anadirVisitante.mostrarFormulario);
 router.post('/anadirVisitante', anadirVisitante.guardarVisitante);
 
+// Ruta para importar profesores desde un archivo Excel
+router.get('/importarProfesores', subirCatalogo.mostrarFormularioImportacion);
+router.post('/importarProfesores', subirCatalogo.importarProfesores);
 
 module.exports = router;

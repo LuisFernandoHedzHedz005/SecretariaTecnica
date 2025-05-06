@@ -3,7 +3,7 @@ const exceljs = require('exceljs');
 const path = require('path');
 const fs = require('fs');
 
-// Función para obtener todos los profesores con información completa
+// Información de los profes 
 const obtenerProfesores = async () => {
   try {
     const sql = `
@@ -40,7 +40,7 @@ const obtenerProfesores = async () => {
   }
 };
 
-// Función para buscar profesores por término
+// BUsacmos por termino 
 const buscarProfesoresPorTermino = async (termino) => {
   try {
     const sql = `
@@ -83,7 +83,7 @@ const buscarProfesoresPorTermino = async (termino) => {
   }
 };
 
-// Función para obtener las categorías de un profesor
+// obtenemos las categorias, tabla dependiente de la bd 
 const obtenerCategoriasPorProfesor = async (profesorId) => {
   try {
     const sql = `
@@ -110,7 +110,7 @@ const obtenerCategoriasPorProfesor = async (profesorId) => {
   }
 };
 
-// Función para mostrar la página principal del administrador con la tabla de profesores
+// Mostramos la tabla, basicamente para la ruta 
 const mostrarTabla = async (req, res) => {
   try {
     const profesores = await obtenerProfesores();
@@ -121,7 +121,7 @@ const mostrarTabla = async (req, res) => {
       profesor.categorias = await obtenerCategoriasPorProfesor(profesor.profesor_id);
     }
     
-    // Obtener mensaje de éxito si existe
+    // debbug 
     const success = req.query.success === 'true';
     const message = req.query.message || '';
     
@@ -142,9 +142,9 @@ const mostrarTabla = async (req, res) => {
   }
 };
 
-// Función genérica para generar Excel con datos de profesores
+// Generar excell con toda la info
 const generarExcelProfesores = async (profesores) => {
-  // Para cada profesor, obtenemos sus categorías
+  // Para cada profesor, obtenemos sus categorías otra vez
   for (const profesor of profesores) {
     profesor.categorias = await obtenerCategoriasPorProfesor(profesor.profesor_id);
   }
@@ -153,7 +153,7 @@ const generarExcelProfesores = async (profesores) => {
   const workbook = new exceljs.Workbook();
   const worksheet = workbook.addWorksheet('Profesores');
   
-  // Definir las columnas para el encabezado
+  // Encabezado 
   worksheet.columns = [
     { header: 'ID', key: 'profesor_id', width: 5 },
     { header: 'No. Trabajador', key: 'numero_trabajador', width: 15 },
@@ -182,7 +182,6 @@ const generarExcelProfesores = async (profesores) => {
   
   // Agregar datos de profesores
   profesores.forEach(profesor => {
-    // Crear un texto con las categorías del profesor
     const categoriaTexto = profesor.categorias.map(cat => 
       `${cat.puesto} - ${cat.asignatura} (${cat.fecha_inicio} ${cat.fecha_fin ? ' a ' + cat.fecha_fin : ''})`
     ).join('; ');
@@ -210,14 +209,14 @@ const generarExcelProfesores = async (profesores) => {
   return workbook;
 };
 
-// Función para generar y descargar el Excel con la información de profesores
+// Descargamos el excell
 const descargarExcel = async (req, res) => {
   try {
     let profesores;
     const { termino } = req.query;
     
     if (termino && termino.trim() !== '') {
-      // Si hay un término de búsqueda, usamos los datos filtrados
+      // Si la profesora presiono la lupa de busqueda, solo se descargan los datos filtrados
       profesores = await buscarProfesoresPorTermino(termino);
     } else {
       // Si no hay término de búsqueda, obtenemos todos los profesores
@@ -236,13 +235,13 @@ const descargarExcel = async (req, res) => {
     const excelFilePath = path.join(tempDir, 'profesores.xlsx');
     await workbook.xlsx.writeFile(excelFilePath);
     
-    // Enviar archivo al cliente
+    // Enviar archivo al administrador
     res.download(excelFilePath, 'profesores.xlsx', (err) => {
       if (err) {
         console.error('Error al enviar archivo:', err);
       }
       
-      // Eliminar archivo temporal después de la descarga
+      // Eliminamos el archivo para no tener problemas de espacio en render 
       fs.unlink(excelFilePath, (unlinkErr) => {
         if (unlinkErr) {
           console.error('Error al eliminar archivo temporal:', unlinkErr);
@@ -277,9 +276,9 @@ const buscarProfesores = async (req, res) => {
     res.render('administradorhome', { 
       administrador: req.session.administrador,
       profesores: profesores,
-      visitantes: visitantes, // Añadimos esta variable
+      visitantes: visitantes, 
       busqueda: termino,
-      success: false, // Valores por defecto para evitar errores
+      success: false, 
       message: ''
     });
   } catch (error) {
@@ -300,7 +299,7 @@ const eliminarProfesor = async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID de profesor no proporcionado' });
     }
     
-    // Primero obtenemos los datos del profesor para log
+    // Primero obtenemos los datos 
     const sqlGetProfesor = `
       SELECT 
         p.nombre, p.apellido_paterno, p.apellido_materno, p.numero_trabajador
@@ -316,7 +315,7 @@ const eliminarProfesor = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Profesor no encontrado' });
     }
     
-    // La tabla tiene relaciones con DELETE CASCADE, así que solo necesitamos eliminar el profesor
+    // On delete cascade, debemos eliminar el profesor 
     const sqlDeleteProfesor = `DELETE FROM profesor WHERE profesor_id = $1`;
     await query(sqlDeleteProfesor, [id]);
     
@@ -374,7 +373,7 @@ const eliminarVisitante = async (req, res) => {
       return res.status(400).json({ success: false, message: 'ID de visitante no proporcionado' });
     }
     
-    // Primero obtenemos los datos del visitante para log
+    // Primero obtenemos los datos del visitante
     const sqlGetVisitante = `
       SELECT 
         u.usuario, u.correo
@@ -413,11 +412,459 @@ const eliminarVisitante = async (req, res) => {
   }
 };
 
-// Exportar funciones del controlador
+const multer = require('multer');
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    const uploadDir = path.join(__dirname, '../uploads');
+    // Crear directorio si no existe
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
+  },
+  filename: function(req, file, cb) {
+    cb(null, 'profesores-' + Date.now() + path.extname(file.originalname));
+  }
+});
+
+// SOLO EXCELLLLLLLL
+const fileFilter = (req, file, cb) => {
+  const extname = path.extname(file.originalname).toLowerCase();
+  if (extname === '.xlsx' || extname === '.xls') {
+    cb(null, true);
+  } else {
+    cb(new Error('Solo se permiten archivos Excel (.xlsx, .xls)'), false);
+  }
+};
+
+// Configurar el middleware de carga
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB
+}).single('archivo');
+
+// Mapeo entre nombres de tablas y sus columnas ID correspondientes
+// Como estamos usando catalogos, es necesario el mapeo
+const idColumnMappings = {
+  'genero': 'genero_id',
+  'grado_academico': 'grado_id',
+  'puesto': 'puesto_id',
+  'asignatura': 'asignatura_id',
+  'estado_profesor': 'estado_id'
+};
+
+// Mapeo entre nombres de columnas en Excel y sus equivalentes en la base de datos
+const excelToDbMappings = {
+  'Género': 'genero',
+  'Grado Académico': 'grado_academico',
+  'Estado': 'estado_profesor'
+};
+
+// Obtener ID
+const encontrarIdEnCatalogo = async (tabla, campo, valor) => {
+  // Usar el mapeo para obtener el nombre correcto de la columna ID
+  const idColumn = idColumnMappings[tabla] || `${tabla}_id`;
+  
+  const sql = `SELECT ${idColumn} FROM ${tabla} WHERE descripcion ILIKE $1`;
+  try {
+    const result = await query(sql, [valor]);
+    
+    if (result.length > 0) {
+      return result[0][idColumn];
+    }
+    console.warn(`No se encontró el valor "${valor}" en la tabla "${tabla}"`);
+    return null;
+  } catch (error) {
+    console.error(`Error al buscar en la tabla ${tabla}:`, error);
+    throw new Error(`Error al buscar ${valor} en la tabla ${tabla}: ${error.message}`);
+  }
+};
+
+// Función auxiliar para encontrar ID de asignatura
+const encontrarAsignaturaId = async (nombre) => {
+  const sql = `SELECT asignatura_id FROM asignatura WHERE nombre ILIKE $1`;
+  try {
+    const result = await query(sql, [nombre]);
+    
+    if (result.length > 0) {
+      return result[0].asignatura_id;
+    }
+    console.warn(`No se encontró la asignatura "${nombre}"`);
+    return null;
+  } catch (error) {
+    console.error(`Error al buscar asignatura ${nombre}:`, error);
+    throw new Error(`Error al buscar asignatura ${nombre}: ${error.message}`);
+  }
+};
+
+// Función auxiliar para procesar la cadena de categorías y crear registros
+const procesarCategorias = async (categoriaTexto, profesorId) => {
+  // Si no hay texto de categorías, no hacer nada
+  if (!categoriaTexto) return [];
+
+  // Dividir las diferentes categorías (separadas por punto y coma)
+  const categorias = categoriaTexto.split(';').map(cat => cat.trim()).filter(cat => cat);
+  const categoriasInsertadas = [];
+
+  for (const categoria of categorias) {
+    try {
+      // "Puesto - Asignatura (FechaInicio a FechaFin)" o "Puesto - Asignatura (FechaInicio )"
+      //Expresion regular
+      const matchCategoria = categoria.match(/(.+?)\s+-\s+(.+?)\s+\((.+?)\)/);
+      
+      if (matchCategoria) {
+        const puesto = matchCategoria[1].trim();
+        const asignatura = matchCategoria[2].trim();
+        const fechasTexto = matchCategoria[3].trim();
+        
+        // Buscar IDs en catálogos
+        const puestoId = await encontrarIdEnCatalogo('puesto', 'descripcion', puesto);
+        const asignaturaId = await encontrarAsignaturaId(asignatura);
+        
+        if (!puestoId || !asignaturaId) {
+          console.warn(`No se encontró el puesto "${puesto}" o asignatura "${asignatura}" en los catálogos`);
+          continue;
+        }
+        
+        // Procesar fechas
+        let fechaInicio = null;
+        let fechaFin = null;
+        
+        if (fechasTexto.includes(' a ')) {
+          // Formato "FechaInicio a FechaFin"
+          const [inicio, fin] = fechasTexto.split(' a ').map(f => f.trim());
+          fechaInicio = inicio === 'null' ? null : formatearFecha(inicio);
+          fechaFin = fin === 'null' ? null : formatearFecha(fin);
+        } else {
+          // Solo fecha de inicio
+          fechaInicio = fechasTexto === 'null' ? null : formatearFecha(fechasTexto);
+        }
+        
+        // Insertar en la tabla categoria_profesor
+        const sqlInsertCategoria = `
+          INSERT INTO categoria_profesor 
+            (profesor_id, puesto_id, asignatura_id, fecha_inicio, fecha_fin)
+          VALUES 
+            ($1, $2, $3, $4, $5)
+          ON CONFLICT (profesor_id, puesto_id, asignatura_id, fecha_inicio)
+          DO NOTHING
+          RETURNING categoria_id
+        `;
+        
+        const result = await query(sqlInsertCategoria, [
+          profesorId,
+          puestoId,
+          asignaturaId,
+          fechaInicio,
+          fechaFin
+        ]);
+        
+        if (result.length > 0) {
+          categoriasInsertadas.push(result[0].categoria_id);
+        }
+      } else {
+        console.warn(`Formato de categoría inválido: ${categoria}`);
+      }
+    } catch (error) {
+      console.error(`Error al procesar categoría: ${categoria}`, error);
+      throw new Error(`Error al procesar categoría "${categoria}": ${error.message}`);
+    }
+  }
+  
+  return categoriasInsertadas;
+};
+
+// Función auxiliar para formatear fecha de DD/MM/YYYY a YYYY-MM-DD para PostgreSQL
+const formatearFecha = (fechaStr) => {
+  if (!fechaStr || fechaStr === 'null') return null;
+  
+  // Formato esperado DD/MM/YYYY
+  const partes = fechaStr.split('/');
+  if (partes.length === 3) {
+    // Asegurarse de que los componentes tengan el formato correcto
+    const dia = partes[0].padStart(2, '0');
+    const mes = partes[1].padStart(2, '0');
+    const anio = partes[2].length === 2 ? `20${partes[2]}` : partes[2];
+    
+    return `${anio}-${mes}-${dia}`;
+  }
+  
+  return fechaStr; // SI todo falla, devolvemos el original
+};
+
+// Función principal para procesar el archivo Excel y cargar datos
+const procesarExcel = async (filePath) => {
+  const workbook = new exceljs.Workbook();
+  await workbook.xlsx.readFile(filePath);
+  
+  const worksheet = workbook.getWorksheet(1); 
+  const resultados = {
+    profesoresImportados: 0,
+    profesoresActualizados: 0,
+    errores: []
+  };
+  
+  // Procesar cada fila (excepto la primera que son los encabezados)
+  for (let i = 2; i <= worksheet.rowCount; i++) {
+    const row = worksheet.getRow(i);
+    
+    try {
+      // Si la fila está vacía o no tiene número de trabajador, la saltamos
+      const numeroTrabajador = row.getCell(2).text.trim();
+      if (!numeroTrabajador) continue;
+      
+      // Extraer datos de la fila
+      const profesorId = row.getCell(1).value;
+      const nombreCompleto = row.getCell(3).text.trim();
+      const genero = row.getCell(4).text.trim();
+      const rfc = row.getCell(5).text.trim();
+      const curp = row.getCell(6).text.trim();
+      const gradoAcademico = row.getCell(7).text.trim();
+      const antiguedadUNAM = parseInt(row.getCell(8).value) || 0;
+      const antiguedadCarrera = parseInt(row.getCell(9).value) || 0;
+      const correoInstitucional = row.getCell(10).text.trim();
+      const telefonoCasa = row.getCell(11).text.trim();
+      const telefonoCelular = row.getCell(12).text.trim();
+      const direccion = row.getCell(13).text.trim();
+      const estado = row.getCell(14).text.trim();
+      const categorias = row.getCell(15).text.trim();
+      
+      // Procesar el nombre completo para obtener nombre y apellidos
+      let nombre = '';
+      let apellidoPaterno = '';
+      let apellidoMaterno = '';
+      
+      const nombrePartes = nombreCompleto.split(' ');
+      if (nombrePartes.length >= 3) {
+        //último elemento como apellido materno
+        apellidoMaterno = nombrePartes.pop();
+        //penúltimo elemento como apellido paterno
+        apellidoPaterno = nombrePartes.pop();
+        // El resto es el nombre
+        nombre = nombrePartes.join(' ');
+      } else if (nombrePartes.length === 2) {
+        nombre = nombrePartes[0];
+        apellidoPaterno = nombrePartes[1];
+        apellidoMaterno = '';
+      } else {
+        nombre = nombreCompleto;
+        apellidoPaterno = '';
+        apellidoMaterno = '';
+      }
+      
+      // Mapear nombres del Excel a nombres de tablas en la BD
+      const generoTabla = excelToDbMappings['Género'] || 'genero';
+      const gradoTabla = excelToDbMappings['Grado Académico'] || 'grado_academico';
+      const estadoTabla = excelToDbMappings['Estado'] || 'estado_profesor';
+      
+      // Buscar IDs en tablas catálogo usando los nombres mapeados
+      const generoId = await encontrarIdEnCatalogo(generoTabla, 'descripcion', genero);
+      const gradoId = await encontrarIdEnCatalogo(gradoTabla, 'descripcion', gradoAcademico);
+      const estadoId = await encontrarIdEnCatalogo(estadoTabla, 'descripcion', estado);
+      
+      if (!generoId) {
+        resultados.errores.push(`Fila ${i}: Género "${genero}" no encontrado en el catálogo`);
+        continue;
+      }
+      
+      if (!gradoId) {
+        resultados.errores.push(`Fila ${i}: Grado académico "${gradoAcademico}" no encontrado en el catálogo`);
+        continue;
+      }
+      
+      if (!estadoId) {
+        resultados.errores.push(`Fila ${i}: Estado "${estado}" no encontrado en el catálogo`);
+        continue;
+      }
+      
+      // Verificar si el profesor ya existe (por número de trabajador)
+      const sqlCheckProfesor = `SELECT profesor_id FROM profesor WHERE numero_trabajador = $1`;
+      const profesorExistente = await query(sqlCheckProfesor, [numeroTrabajador]);
+      
+      let nuevoProfesorId;
+      
+      if (profesorExistente.length > 0) {
+        // Actualizar profesor existente
+        nuevoProfesorId = profesorExistente[0].profesor_id;
+        
+        const sqlUpdateProfesor = `
+          UPDATE profesor SET
+            nombre = $1,
+            apellido_paterno = $2,
+            apellido_materno = $3,
+            genero_id = $4,
+            rfc = $5,
+            curp = $6,
+            grado_id = $7,
+            antiguedad_unam = $8,
+            antiguedad_carrera = $9,
+            correo_institucional = $10,
+            telefono_casa = $11,
+            telefono_celular = $12,
+            direccion = $13,
+            estado_id = $14
+          WHERE profesor_id = $15
+          RETURNING profesor_id
+        `;
+        
+        await query(sqlUpdateProfesor, [
+          nombre,
+          apellidoPaterno,
+          apellidoMaterno,
+          generoId,
+          rfc,
+          curp,
+          gradoId,
+          antiguedadUNAM,
+          antiguedadCarrera,
+          correoInstitucional,
+          telefonoCasa,
+          telefonoCelular,
+          direccion,
+          estadoId,
+          nuevoProfesorId
+        ]);
+        
+        resultados.profesoresActualizados++;
+      } else {
+        // Insertar nuevo profesor
+        const sqlInsertProfesor = `
+          INSERT INTO profesor (
+            numero_trabajador, nombre, apellido_paterno, apellido_materno,
+            genero_id, rfc, curp, grado_id, antiguedad_unam, antiguedad_carrera,
+            correo_institucional, telefono_casa, telefono_celular, direccion, estado_id
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+          )
+          RETURNING profesor_id
+        `;
+        
+        const resultInsert = await query(sqlInsertProfesor, [
+          numeroTrabajador,
+          nombre,
+          apellidoPaterno,
+          apellidoMaterno,
+          generoId,
+          rfc,
+          curp,
+          gradoId,
+          antiguedadUNAM,
+          antiguedadCarrera,
+          correoInstitucional,
+          telefonoCasa,
+          telefonoCelular,
+          direccion,
+          estadoId
+        ]);
+        
+        nuevoProfesorId = resultInsert[0].profesor_id;
+        resultados.profesoresImportados++;
+      }
+      
+      // Procesar categorías
+      try {
+        await procesarCategorias(categorias, nuevoProfesorId);
+      } catch (error) {
+        resultados.errores.push(`Fila ${i}: Error al procesar categorías: ${error.message}`);
+      }
+      
+    } catch (error) {
+      console.error(`Error al procesar fila ${i}:`, error);
+      resultados.errores.push(`Fila ${i}: ${error.message}`);
+    }
+  }
+  
+  return resultados;
+};
+
+// Para la ruta
+const mostrarFormularioImportacion = (req, res) => {
+  res.render('importarProfesores', {
+    administrador: req.session.administrador,
+    success: false,
+    message: '',
+    errors: []
+  });
+};
+
+const importarProfesores = (req, res) => {
+  upload(req, res, async function(err) {
+    if (err instanceof multer.MulterError) {
+      // Error de multer
+      return res.render('importarProfesores', {
+        administrador: req.session.administrador,
+        success: false,
+        message: '',
+        errors: [`Error en la carga del archivo: ${err.message}`]
+      });
+    } else if (err) {
+      // Otro tipo de error
+      return res.render('importarProfesores', {
+        administrador: req.session.administrador,
+        success: false,
+        message: '',
+        errors: [`Error: ${err.message}`]
+      });
+    }
+    
+    // Si no hay archivo
+    if (!req.file) {
+      return res.render('importarProfesores', {
+        administrador: req.session.administrador,
+        success: false,
+        message: '',
+        errors: ['No se ha seleccionado ningún archivo']
+      });
+    }
+    
+    try {
+      // Procesar el archivo Excel
+      const resultados = await procesarExcel(req.file.path);
+      
+      // Eliminar el archivo temporal
+      fs.unlink(req.file.path, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error('Error al eliminar archivo temporal:', unlinkErr);
+        }
+      });
+      
+      // Preparar mensaje de resultados
+      let mensaje = `Importación completada: ${resultados.profesoresImportados} profesores nuevos, ${resultados.profesoresActualizados} profesores actualizados.`;
+      
+      // Renderizar vista con resultados
+      res.render('importarProfesores', {
+        administrador: req.session.administrador,
+        success: resultados.errores.length === 0,
+        message: mensaje,
+        errors: resultados.errores
+      });
+      
+    } catch (error) {
+      console.error('Error al procesar el archivo Excel:', error);
+      
+      // Eliminar el archivo temporal si existe
+      if (req.file && req.file.path) {
+        fs.unlink(req.file.path, () => {});
+      }
+      
+      res.render('importarProfesores', {
+        administrador: req.session.administrador,
+        success: false,
+        message: '',
+        errors: [`Error al procesar el archivo: ${error.message}`]
+      });
+    }
+  });
+};
+
+// Exportar
 module.exports = {
   mostrarTabla,
   descargarExcel,
   buscarProfesores,
   eliminarProfesor,
-  eliminarVisitante
+  eliminarVisitante,
+  mostrarFormularioImportacion,
+  importarProfesores
 };

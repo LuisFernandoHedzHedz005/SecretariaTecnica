@@ -1,7 +1,7 @@
 
 BEGIN;
 
--- 1. Derribar tablas dependientes
+-- Tablas abajo para empezar desde cero :/
 DROP TABLE IF EXISTS categoria_profesor                ;
 DROP TABLE IF EXISTS usuario_app                       ;
 DROP TABLE IF EXISTS profesor                          ;
@@ -12,7 +12,6 @@ DROP TABLE IF EXISTS puesto                            ;
 DROP TABLE IF EXISTS grado_academico                   ;
 DROP TABLE IF EXISTS genero                            ;
 
--- 2. Crear tablas en orden de dependencia
 CREATE TABLE IF NOT EXISTS genero (
   genero_id   SERIAL PRIMARY KEY,
   descripcion VARCHAR(20) NOT NULL UNIQUE
@@ -111,7 +110,7 @@ CREATE TABLE IF NOT EXISTS usuario_app (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- 3. Datos semilla
+-- Catalogos que creamos para la consistencia de datos
 INSERT INTO genero (descripcion) VALUES
   ('Masculino'),
   ('Femenino'),

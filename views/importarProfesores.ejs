@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Sistema de importación de profesores" />
+        <meta name="author" content="Ingeniería Mecánica" />
+        <title>Importar Profesores - Sistema de Administración</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="/image/favicon.ico" />
+        <!-- Google Font-->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Font Awesome para iconos -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- SweetAlert2 -->
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->       
+        <link href="/css/styles.css" rel="stylesheet" />
+        <style>
+            .text-gradient {
+                background: linear-gradient(45deg, #0061f2, #6900c7);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .upload-area {
+                border: 2px dashed #ccc;
+                border-radius: 8px;
+                padding: 30px;
+                text-align: center;
+                margin-bottom: 20px;
+                background-color: #f8f9fa;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .upload-area:hover {
+                border-color: #0061f2;
+                background-color: #e9ecef;
+            }
+            .file-name {
+                margin-top: 15px;
+                font-weight: bold;
+                color: #0061f2;
+            }
+            .instructions {
+                background-color: #e9f5ff;
+                border: 1px solid #b8daff;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 25px;
+                box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.05);
+            }
+            .sample-row {
+                background-color: #f0f0f0;
+                border-radius: 6px;
+                padding: 12px;
+                margin-bottom: 12px;
+                font-family: monospace;
+                font-size: 12px;
+                overflow-x: auto;
+                box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            }
+        </style>
+    </head>
+    <body class="d-flex flex-column h-100">
+        <main class="flex-shrink-0">
+            <!-- Navbar-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+                <div class="container px-5">
+                    <a class="navbar-brand" href="/"><span class="fw-bolder text-primary">Ingeniería Mecánica - Secretaría Técnica</span></a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 small fw-bolder">
+                            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/administradorhome">Tabla</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/administradorLogin/logout">Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Page content-->
+            <section class="py-5">
+                <div class="container px-5">
+                    <div class="text-center mb-5">
+                        <h1 class="display-5 fw-bolder mb-0"><span class="text-gradient d-inline">Importar Profesores</span></h1>
+                    </div>
+                    
+                    <div class="row gx-5 justify-content-center">
+                        <div class="col-lg-11 col-xl-9 col-xxl-8">
+                            <!-- Mensajes de éxito o error -->
+                            <% if (success) { %>
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle"></i> <%= message %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            <% } %>
+                            
+                            <% if (errors && errors.length > 0) { %>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-triangle"></i> Se encontraron errores durante la importación:
+                                    <ul class="mb-0 mt-2">
+                                        <% errors.forEach(function(error) { %>
+                                            <li><%= error %></li>
+                                        <% }); %>
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            <% } %>
+                            
+                            <!-- Dashboard card -->
+                            <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
+                                <div class="card-body p-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="p-5 w-100">
+                                            <h2 class="fw-bolder"><i class="bi bi-file-earmark-excel"></i> Importación Masiva desde Excel</h2>
+                                            <p class="lead fw-light mb-4">Importe profesores de manera eficiente utilizando archivos Excel.</p>
+                                            
+                                            <!-- Instrucciones -->
+                                            <div class="instructions mb-4">
+                                                <h4><i class="bi bi-info-circle"></i> Instrucciones</h4>
+                                                <p>Para importar profesores desde un archivo Excel, siga estos pasos:</p>
+                                                <ol>
+                                                    <li>Asegúrese de que su archivo Excel tenga el formato correcto (ver ejemplo abajo).</li>
+                                                    <li>Haga clic en el área de carga o seleccione el archivo usando el botón de examinar.</li>
+                                                    <li>Haga clic en "Importar Profesores" para comenzar la importación.</li>
+                                                </ol>
+                                                
+                                                <p><strong>Formato esperado:</strong></p>
+                                                <div class="sample-row">
+                                                    ID | No. Trabajador | Nombre | Género | RFC | CURP | Grado Académico | Antigüedad UNAM | Antigüedad Carrera | Correo Institucional | Teléfono Casa | Teléfono Celular | Dirección | Estado | Categorías
+                                                </div>
+                                                <div class="sample-row">
+                                                    5 | 0017 | Luis Hernández Hernández | Masculino | HHEL810101XXX | HEHL810101HNLLNS09 | Doctorado | 5 | 5 | luis.hernandez@unam.mx | 5550001111 | 5512345678 | Calle Falsa 123, CDMX | Activo | Tiempo completo - Asignatura B (01/09/2022 ); Definitivo - Asignatura A (01/01/2020 )
+                                                </div>
+                                                
+                                                <p class="mb-0 mt-3"><strong>Notas importantes:</strong></p>
+                                                <ul>
+                                                    <li>El campo "ID" es opcional para profesores nuevos.</li>
+                                                    <li>Para las categorías, use el formato: <code>Puesto - Asignatura (Fecha inicio a Fecha fin)</code> o <code>Puesto - Asignatura (Fecha inicio )</code> separadas por punto y coma.</li>
+                                                    <li>Los valores de "Género", "Grado Académico" y "Estado" deben coincidir exactamente con los valores existentes en la base de datos.</li>
+                                                    <li>Las fechas deben estar en formato DD/MM/YYYY.</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <!-- Formulario de carga -->
+                                            <form action="/administradorhome/importarProfesores" method="POST" enctype="multipart/form-data" id="uploadForm">
+                                                <div class="upload-area shadow-sm" id="uploadArea">
+                                                    <i class="bi bi-cloud-upload fa-3x mb-3 text-primary"></i>
+                                                    <h4>Arrastre y suelte su archivo Excel aquí</h4>
+                                                    <p>o</p>
+                                                    <input type="file" name="archivo" id="fileInput" class="form-control" accept=".xlsx,.xls" style="display: none;">
+                                                    <button type="button" class="btn btn-outline-primary px-4" id="browseButton">Examinar archivos</button>
+                                                    <div class="file-name mt-3" id="fileName"></div>
+                                                </div>
+                                                
+                                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                    <a href="/administradorhome" class="btn btn-secondary me-md-2">
+                                                        <i class="bi bi-arrow-left"></i> Volver
+                                                    </a>
+                                                    <button type="submit" class="btn btn-primary" id="submitButton" disabled>
+                                                        <i class="bi bi-file-earmark-excel"></i> Importar Profesores
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer-->
+        <footer class="bg-white py-4 mt-auto">
+            <div class="container px-5">
+                <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                    <div class="col-auto"><div class="small m-0">Copyright &copy; Ingeniería Mecánica 2025</div></div>
+                    <div class="col-auto">
+                        <a class="small" href="https://www.aragon.unam.mx/fes-aragon/public_html/documents/aviso-de-privacidad/integral-de-la-fes-aragon.pdf">Privacidad</a>
+                        <span class="mx-1">&middot;</span>
+                        <a class="small" href="https://www.aragon.unam.mx/fes-aragon/#!/inicio">FESAragon</a>
+                        <span class="mx-1">&middot;</span>
+                        <a class="small" href="/contacto">Contacto</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        
+        <!-- Scripts -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                const fileName = document.getElementById('fileName');
+                const browseButton = document.getElementById('browseButton');
+                const submitButton = document.getElementById('submitButton');
+                
+                // Manejar el clic en el área de carga
+                uploadArea.addEventListener('click', function() {
+                    fileInput.click();
+                });
+                
+                // Manejar el clic en el botón de examinar
+                browseButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    fileInput.click();
+                });
+                
+                // Manejar el cambio en el input de archivo
+                fileInput.addEventListener('change', function() {
+                    if (fileInput.files.length > 0) {
+                        fileName.textContent = fileInput.files[0].name;
+                        submitButton.disabled = false;
+                    } else {
+                        fileName.textContent = '';
+                        submitButton.disabled = true;
+                    }
+                });
+                
+                // Manejar el arrastrar y soltar
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    uploadArea.classList.add('border-primary');
+                });
+                
+                uploadArea.addEventListener('dragleave', function() {
+                    uploadArea.classList.remove('border-primary');
+                });
+                
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    uploadArea.classList.remove('border-primary');
+                    
+                    if (e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        if (fileInput.files[0].name.match(/\.(xlsx|xls)$/)) {
+                            fileName.textContent = fileInput.files[0].name;
+                            submitButton.disabled = false;
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Formato inválido',
+                                text: 'Por favor, seleccione un archivo Excel válido (.xlsx o .xls)'
+                            });
+                            fileName.textContent = '';
+                            submitButton.disabled = true;
+                        }
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

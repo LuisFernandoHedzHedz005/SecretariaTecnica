@@ -71,7 +71,7 @@ const guardarVisitante = async (req, res) => {
       const result = await query(sqlInsert, [usuario, contrasena, correo, rolId]);
       
       if (result.length > 0) {
-        // Visitante creado exitosamente, redirigir al dashboard con parámetro de éxito
+        // Redirigir a la página de inicio del administrador con un mensaje de éxito
         return res.redirect('/administradorhome?success=true&message=' + encodeURIComponent(`Visitante ${usuario} creado correctamente`));
       } else {
         throw new Error('No se pudo crear el visitante');

@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-// Importar connect-pg-simple
+// connect-pg-simple
 const pgSession = require('connect-pg-simple')(session);
 const { pool } = require('./config/conexion');
 const indexRouter = require('./routes/index');
@@ -16,7 +16,7 @@ const editarProfesorRouter = require('./routes/editarProfesor');
 const asignaturaHomeRouter = require('./routes/asignaturaHome');
 
 const app = express();
-const PORT = process.env.PORT || 10000; // Render normalmente usa PORT=10000
+const PORT = process.env.PORT || 3000; // PORT=10000 al menos en render
 
 // Configura la ubicación de las vistas
 app.set('views', __dirname + '/views');
@@ -24,13 +24,12 @@ app.set('views', __dirname + '/views');
 // Configura el motor de plantillas
 app.set('view engine', 'ejs');
 
-// Determinar el entorno (desarrollo o producción)
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Configuración de la sesión con PostgreSQL como store
+// Configuración de la sesión con PostgreSQL
 app.use(session({
     store: new pgSession({
-        pool: pool,                 // Usar el pool de conexiones existente
+        pool: pool,                 
         tableName: 'session',       // Nombre de la tabla para las sesiones
         createTableIfMissing: true  // Crear la tabla si no existe
     }),
@@ -43,7 +42,7 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000, // 24 horas
         sameSite: 'lax'  // Ayuda con problemas de cookies en redirecciones
     },
-    proxy: isProduction  // Necesario cuando trabajas detrás de un proxy como en Render
+    proxy: isProduction 
 }));
 
 app.use(express.json());
@@ -90,11 +89,12 @@ app.use('/administradorhome/anadirProfesor', verificarAutenticacion, anadirProfe
 
 // Agregar ruta para editar profesor
 app.use('/administradorhome/editarProfesor', verificarAutenticacion, editarProfesorRouter);
-
 // Agregar ruta para asignatura
 app.use('/asignaturaHome', verificarAutenticacion, asignaturaHomeRouter);
+// Agregar ruta para importar profesores
+app.use('/importarProfesores', verificarAutenticacion, administradorRoutes);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
-    console.log(`Servidor ejecutándose en puerto ${PORT}`);
+    console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });
