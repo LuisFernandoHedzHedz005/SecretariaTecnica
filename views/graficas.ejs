@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Gráficas de profesores" />
+    <meta name="author" content="" />
+    <title>Gráficas - Datos de Profesores</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="/image/favicon.ico" />
+    <!-- Custom Google font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="/css/styles.css" rel="stylesheet" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="d-flex flex-column h-100 bg-light">
+    <main class="flex-shrink-0">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+            <div class="container px-5">
+                <a class="navbar-brand" href="/"><span class="fw-bolder text-primary">Ingeniería Mecánica - Secretaría Técnica</span></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 small fw-bolder">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://www.imc-aragon.com/">IMC-FESAragon</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/contacto">Contacto</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/sugerencias">Sugerencias</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Gráficas Section-->
+        <section class="py-5">
+            <div class="container px-5 mb-5">
+                <div class="text-center mb-5">
+                    <h1 class="display-5 fw-bolder mb-0"><span class="text-gradient d-inline">Estadísticas de Profesores</span></h1>
+                </div>
+
+                <% if (success) { %>
+                <div class="alert alert-success" role="alert">
+                    <%= message %>
+                </div>
+                <% } %>
+
+                <div class="row gx-5 mb-5">
+                    <!-- Gráfica de Género -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow rounded-4 border-0">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h2 class="fw-bold fs-4 mb-0">Distribución por Género</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                    <canvas id="generoChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfica de Grado Académico -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow rounded-4 border-0">
+                            <div class="card-header bg-success text-white py-3">
+                                <h2 class="fw-bold fs-4 mb-0">Distribución por Grado Académico</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                    <canvas id="gradoChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row gx-5">
+                    <!-- Gráfica de Puesto -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow rounded-4 border-0">
+                            <div class="card-header bg-warning text-dark py-3">
+                                <h2 class="fw-bold fs-4 mb-0">Distribución por Puesto</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                    <canvas id="puestoChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfica de Antigüedad -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow rounded-4 border-0">
+                            <div class="card-header bg-info text-white py-3">
+                                <h2 class="fw-bold fs-4 mb-0">Distribución por Antigüedad</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                    <canvas id="antiguedadChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to action section-->            
+        <section class="py-5 bg-gradient-primary-to-secondary text-white">
+            <div class="container px-5 my-5">
+                <div class="text-center">
+                    <h2 class="display-4 fw-bolder mb-4">¿Necesitas acceso o información? ¡Déjanos saber!</h2>
+                    <a class="btn btn-outline-light btn-lg px-5 py-3 fs-6 fw-bolder" href="/sugerencias">Deja una nota</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer-->        
+    <footer class="bg-white py-4 mt-auto">
+        <div class="container px-5">
+            <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                <div class="col-auto"><div class="small m-0">Copyright &copy; Your Website 2023</div></div>
+                <div class="col-auto">
+                    <a class="small" href="https://www.aragon.unam.mx/fes-aragon/public_html/documents/aviso-de-privacidad/integral-de-la-fes-aragon.pdf">Privacidad</a>
+                    <span class="mx-1">&middot;</span>
+                    <a class="small" href="https://www.aragon.unam.mx/fes-aragon/#!/inicio">FESAragon</a>
+                    <span class="mx-1">&middot;</span>
+                    <a class="small" href="/contacto">Contacto</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
+
+    
+    <script>
+        // Evitar errores de editor
+        (function() {
+          var datosEjs = {
+            genero: JSON.parse('<%- datosGenero %>'),
+            gradoAcademico: JSON.parse('<%- datosGradoAcademico %>'),
+            puesto: JSON.parse('<%- datosPuesto %>'),
+            antiguedad: JSON.parse('<%- datosAntiguedad %>')
+          };
+
+          window._datos = datosEjs;
+          console.log('Datos inyectados:', window._datos);
+        })();
+      </script>
+
+    <script src="/js/scripts.js"></script>
+
+</body>
+</html>
