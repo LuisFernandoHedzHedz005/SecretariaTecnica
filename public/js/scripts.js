@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
       puesto: ['#e74a3b','#4e73df','#1cc88a'],
       antiguedad: ['#36b9cc','#1cc88a','#f6c23e','#e74a3b']
     };
+    
+    // leyenda
     const configComun = {
       responsive: true,
       maintainAspectRatio: false,
@@ -22,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
           labels: { 
             padding: 20, 
             font: { size: 12 },
-            // porcentaje
+            // Porcentaje
             generateLabels: function(chart) {
               const data = chart.data;
               if (data.labels.length && data.datasets.length) {
@@ -58,6 +60,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     };
+    
+    function creaPie(id, datos, paleta) {
+      const c = document.getElementById(id);
+      if (!c) return console.warn(`Canvas ${id} no existe`);
+      
+      new Chart(c, {
+        type: 'pie',
+        data: { 
+          labels: datos.labels, 
+          datasets:[{ 
+            data: datos.valores, 
+            backgroundColor: paleta 
+          }] 
+        },
+        options: configComun
+      });
+    }
     
     creaPie('generoChart', genero, colores.genero);
     creaPie('gradoChart', gradoAcademico, colores.grado);
