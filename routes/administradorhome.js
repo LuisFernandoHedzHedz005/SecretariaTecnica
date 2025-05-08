@@ -45,6 +45,6 @@ router.get('/importarProfesores', subirCatalogo.mostrarFormularioImportacion);
 router.post('/importarProfesores', subirCatalogo.importarProfesores);
 
 // Ruta para descargar la plantilla de importación
-router.get('descargarPlantilla', plantillaCatalogo.descargarPlantilla);
+router.get('/descargarPlantilla', plantillaCatalogo.descargarPlantilla);
 
 module.exports = router;
