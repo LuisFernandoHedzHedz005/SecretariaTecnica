@@ -94,6 +94,7 @@ app.use('/administradorhome/editarProfesor', verificarAutenticacion, editarProfe
 app.use('/asignaturaHome', verificarAutenticacion, asignaturaHomeRouter);
 // Agregar ruta para importar profesores
 app.use('/importarProfesores', verificarAutenticacion, administradorRoutes);
+app.use('/administradorhome/descargarPlantilla', verificarAutenticacion, administradorRoutes);
 // Agregar ruta para graficas
 app.use('/graficas', verificarAutenticacion, graficasRouter);
 

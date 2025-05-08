@@ -17,6 +17,7 @@ const administradorhomeController = require('../controllers/administradorhomeCon
 const editarProfesor = require('../controllers/editarProfesorController');
 const anadirVisitante = require('../controllers/anadirVisitanteController');
 const subirCatalogo = require('../controllers/administradorhomeController');
+const plantillaCatalogo = require('../controllers/administradorhomeController');
 
 // Ruta para el dashboard principal
 router.get('/', administradorhomeController.mostrarTabla);;
@@ -42,5 +43,8 @@ router.post('/anadirVisitante', anadirVisitante.guardarVisitante);
 // Ruta para importar profesores desde un archivo Excel
 router.get('/importarProfesores', subirCatalogo.mostrarFormularioImportacion);
 router.post('/importarProfesores', subirCatalogo.importarProfesores);
+
+// Ruta para descargar la plantilla de importación
+router.get('descargarPlantilla', plantillaCatalogo.descargarPlantilla);
 
 module.exports = router;

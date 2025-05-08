@@ -858,6 +858,87 @@ const importarProfesores = (req, res) => {
   });
 };
 
+const descargarPlantilla = async (req, res) => {
+  try {
+    // Crear un nuevo libro de Excel
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('Plantilla_Profesores');
+    
+    // Configurar columnas con sus encabezados
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 5 },
+      { header: 'No. Trabajador', key: 'numero_trabajador', width: 15 },
+      { header: 'Nombre', key: 'nombre_completo', width: 30 },
+      { header: 'Género', key: 'genero', width: 10 },
+      { header: 'RFC', key: 'rfc', width: 15 },
+      { header: 'CURP', key: 'curp', width: 20 },
+      { header: 'Grado Académico', key: 'grado_academico', width: 15 },
+      { header: 'Antigüedad UNAM', key: 'antiguedad_unam', width: 15 },
+      { header: 'Antigüedad Carrera', key: 'antiguedad_carrera', width: 20 },
+      { header: 'Correo Institucional', key: 'correo_institucional', width: 30 },
+      { header: 'Teléfono Casa', key: 'telefono_casa', width: 15 },
+      { header: 'Teléfono Celular', key: 'telefono_celular', width: 15 },
+      { header: 'Dirección', key: 'direccion', width: 40 },
+      { header: 'Estado', key: 'estado', width: 15 },
+      { header: 'Categorías', key: 'categorias', width: 50 }
+    ];
+    
+    // Estilo para el encabezado
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD3D3D3' }
+    };
+    
+    // Ejemplo de fila con datos de muestra
+    worksheet.addRow({
+      id: '',
+      numero_trabajador: '0017',
+      nombre_completo: 'Luis Hernández Hernández',
+      genero: 'Masculino',
+      rfc: 'HHEL810101XXX',
+      curp: 'HEHL810101HNLLNS09',
+      grado_academico: 'Doctorado',
+      antiguedad_unam: '5',
+      antiguedad_carrera: '5',
+      correo_institucional: 'luis.hernandez@unam.mx',
+      telefono_casa: '5550001111',
+      telefono_celular: '5512345678',
+      direccion: 'Calle Falsa 123, CDMX',
+      estado: 'Activo',
+      categorias: 'Tiempo completo - Asignatura B (01/09/2022 ); Definitivo - Asignatura A (01/01/2020 )'
+    });
+    
+    // Crear directorio temporal si no existe
+    const tempDir = path.join(__dirname, '../temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir);
+    }
+    
+    // Guardar archivo
+    const excelFilePath = path.join(tempDir, 'plantilla_profesores.xlsx');
+    await workbook.xlsx.writeFile(excelFilePath);
+    
+    // Enviar archivo al administrador
+    res.download(excelFilePath, 'plantilla_profesores.xlsx', (err) => {
+      if (err) {
+        console.error('Error al enviar archivo:', err);
+      }
+      
+      // Eliminamos el archivo para no tener problemas de espacio
+      fs.unlink(excelFilePath, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error('Error al eliminar archivo temporal:', unlinkErr);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error al generar plantilla Excel:', error);
+    res.status(500).send('Error al generar la plantilla de Excel');
+  }
+};
+
 // Exportar
 module.exports = {
   mostrarTabla,
@@ -866,5 +947,6 @@ module.exports = {
   eliminarProfesor,
   eliminarVisitante,
   mostrarFormularioImportacion,
-  importarProfesores
+  importarProfesores,
+  descargarPlantilla
 };
