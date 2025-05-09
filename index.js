@@ -97,6 +97,8 @@ app.use('/importarProfesores', verificarAutenticacion, administradorRoutes);
 app.use('/administradorhome/descargarPlantilla', verificarAutenticacion, administradorRoutes);
 // Agregar ruta para graficas
 app.use('/graficas', verificarAutenticacion, graficasRouter);
+// Agregar ruta para eliminar todos los profesores
+app.use('/administradorhome/eliminarTodosProfesores', verificarAutenticacion, administradorRoutes);
 
 // Iniciar el servidor
 app.listen(PORT, () => {

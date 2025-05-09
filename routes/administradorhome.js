@@ -18,6 +18,7 @@ const editarProfesor = require('../controllers/editarProfesorController');
 const anadirVisitante = require('../controllers/anadirVisitanteController');
 const subirCatalogo = require('../controllers/administradorhomeController');
 const plantillaCatalogo = require('../controllers/administradorhomeController');
+const eliminarTodosProfesores = require('../controllers/administradorhomeController');
 
 // Ruta para el dashboard principal
 router.get('/', administradorhomeController.mostrarTabla);;
@@ -46,5 +47,8 @@ router.post('/importarProfesores', subirCatalogo.importarProfesores);
 
 // Ruta para descargar la plantilla de importación
 router.get('/descargarPlantilla', plantillaCatalogo.descargarPlantilla);
+
+//Ruta para eliminar todos los registros de la tabla
+router.delete('/eliminarTodosProfesores', eliminarTodosProfesores.eliminarTodosProfesores);
 
 module.exports = router;

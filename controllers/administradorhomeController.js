@@ -939,6 +939,41 @@ const descargarPlantilla = async (req, res) => {
   }
 };
 
+const eliminarTodosProfesores = async (req, res) => {
+  try {
+      // Primero obtenemos la cantidad de registros que vamos a eliminar para reportar
+      const countProfesoresQuery = 'SELECT COUNT(*) as total FROM profesor';
+      const profesoresCount = await query(countProfesoresQuery);
+      const totalProfesores = parseInt(profesoresCount[0].total);
+      
+      // 1. Eliminamos primero las categorías de profesores
+      // Aunque tenemos ON DELETE CASCADE, lo hacemos explícitamente para mayor control
+      const deleteCategoriasQuery = 'DELETE FROM categoria_profesor';
+      await query(deleteCategoriasQuery);
+      
+      // 2. Eliminamos los profesores
+      const deleteProfesoresQuery = 'DELETE FROM profesor';
+      await query(deleteProfesoresQuery);
+      
+      console.log(`Eliminación masiva: Se han eliminado ${totalProfesores} profesores y todas sus categorías asociadas`);
+      
+      return res.json({
+          success: true,
+          message: `Se han eliminado correctamente ${totalProfesores} profesores y todas sus categorías asociadas`,
+          totalEliminados: totalProfesores
+      });
+      
+  } catch (error) {
+      console.error('Error al eliminar todos los profesores:', error);
+      return res.status(500).json({
+          success: false,
+          message: 'Error al eliminar los profesores',
+          error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno del servidor'
+      });
+  }
+};
+
+
 // Exportar
 module.exports = {
   mostrarTabla,
@@ -948,5 +983,6 @@ module.exports = {
   eliminarVisitante,
   mostrarFormularioImportacion,
   importarProfesores,
-  descargarPlantilla
+  descargarPlantilla,
+  eliminarTodosProfesores
 };

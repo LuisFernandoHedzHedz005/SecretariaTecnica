@@ -103,15 +103,27 @@
                                             <a href="/administradorhome/importarProfesores" class="btn btn-success">
                                                 <i class="fas fa-file-import"></i> Importar Profesores (Excel)
                                             </a>
+                                            <a href="/administradorhome/descargar-excel<%= typeof busqueda !== 'undefined' && busqueda ? '?termino=' + encodeURIComponent(busqueda) : '' %>" class="btn btn-success" id="exportExcelBtn">
+                                                <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+                                            </a>
+                                            <button class="btn btn-danger ms-2" id="eliminarTodosProfesoresBtn">
+                                                <i class="bi bi-trash3"></i> Eliminar Profesores
+                                            </button>
                                             <a href="/graficas" class="btn btn-primary ms-2" id="addProfesorBtn">
                                                 <i class="bi bi-plus-circle"></i> Gráficas
+                                            </a>
+                                            <a href="/administradorhome/anadirProfesor" class="btn btn-primary ms-2" id="addProfesorBtn">
+                                                <i class="bi bi-plus-circle"></i> Añadir Profesor
+                                            </a>
+                                            <a href="/asignaturaHome" class="btn btn-primary ms-2" id="addProfesorBtn">
+                                                <i class="bi bi-plus-circle"></i> Asignatura
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Excell -->
+                            <!-- busqueda -->
                             <div class="card shadow rounded-4 border-0 mb-5">
                                 <div class="card-body p-4">
                                     <div class="row mb-3">
@@ -124,15 +136,7 @@
                                             </form>
                                         </div>
                                         <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                                            <a href="/administradorhome/descargar-excel<%= typeof busqueda !== 'undefined' && busqueda ? '?termino=' + encodeURIComponent(busqueda) : '' %>" class="btn btn-success" id="exportExcelBtn">
-                                                <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
-                                            </a>
-                                            <a href="/administradorhome/anadirProfesor" class="btn btn-primary ms-2" id="addProfesorBtn">
-                                                <i class="bi bi-plus-circle"></i> Añadir Profesor
-                                            </a>
-                                            <a href="/asignaturaHome" class="btn btn-primary ms-2" id="addProfesorBtn">
-                                                <i class="bi bi-plus-circle"></i> Asignatura
-                                            </a>
+                                            
                                         </div>
                                     </div>
                                     <!-- Profesores -->
@@ -530,6 +534,110 @@
                 });
             });
             }
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const btnEliminarTodos = document.getElementById('eliminarTodosProfesoresBtn');
+                
+                if (btnEliminarTodos) {
+                    btnEliminarTodos.addEventListener('click', function() {
+                        Swal.fire({
+                            title: '¡Atención!',
+                            html: `
+                                <p class="text-danger fw-bold">Está a punto de eliminar TODOS los registros de profesores y sus categorías asociadas.</p>
+                                <p>Esta acción no se puede deshacer. Se recomienda hacer una copia de seguridad antes de continuar.</p>
+                                <p>¿Desea descargar una copia de los datos antes de eliminarlos?</p>
+                            `,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            showDenyButton: true,
+                            confirmButtonColor: '#198754',
+                            denyButtonColor: '#dc3545',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Sí, descargar y continuar',
+                            denyButtonText: 'No, eliminar directamente',
+                            cancelButtonText: 'Cancelar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Descargar copia de seguridad primero
+                                window.location.href = '/administradorhome/descargar-excel';
+                                
+                                // Después mostrar un segundo diálogo para confirmar eliminación
+                                setTimeout(() => {
+                                    confirmarEliminacionMasiva();
+                                }, 1000);
+                            } else if (result.isDenied) {
+                                // Eliminar directamente sin descargar
+                                confirmarEliminacionMasiva();
+                            }
+                        });
+                    });
+                }
+                
+                function confirmarEliminacionMasiva() {
+                    Swal.fire({
+                        title: 'Confirmación Final',
+                        html: `
+                            <p class="text-danger fw-bold">¿Está absolutamente seguro?</p>
+                            <p>Se eliminarán TODOS los profesores y sus categorías asociadas.</p>
+                            <p>Escriba "ELIMINAR" para confirmar:</p>
+                        `,
+                        input: 'text',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, eliminar todos',
+                        cancelButtonText: 'Cancelar',
+                        inputValidator: (value) => {
+                            if (value !== 'ELIMINAR') {
+                                return 'Debe escribir "ELIMINAR" para confirmar';
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Enviar solicitud para eliminar todos los profesores
+                            fetch('/administradorhome/eliminarTodosProfesores', {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: '¡Eliminados!',
+                                        text: data.message,
+                                        icon: 'success',
+                                        confirmButtonColor: '#0d6efd'
+                                    }).then(() => {
+                                        // Recargar la página para reflejar los cambios
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: data.message || 'No se pudieron eliminar los profesores',
+                                        icon: 'error',
+                                        confirmButtonColor: '#0d6efd'
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error al eliminar profesores:', error);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al procesar la solicitud',
+                                    icon: 'error',
+                                    confirmButtonColor: '#0d6efd'
+                                });
+                            });
+                        }
+                    });
+                }
+            });
         </script>
     </body>
 </html>
